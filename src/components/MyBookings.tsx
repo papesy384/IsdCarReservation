@@ -12,8 +12,6 @@ import { Language } from '../App';
 import { useBookings } from '../hooks/useBackend';
 import { bookingAPI } from '../utils/api';
 import { toast } from 'sonner@2.0.3';
-import { ConfirmDialog } from './ConfirmDialog';
-import { Breadcrumbs } from './Breadcrumbs';
 import { DateRangePicker, DateRange } from './DateRangePicker';
 import { exportBookingsToCSV } from '../utils/export';
 
@@ -471,15 +469,15 @@ function CancelBookingDialog({ bookingId, onCancel, t }: CancelBookingDialogProp
           {t.cancel}
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-black/95 backdrop-blur-xl border-white/10">
         <AlertDialogHeader>
-          <AlertDialogTitle>{t.cancelConfirmTitle}</AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogTitle className="text-white">{t.cancelConfirmTitle}</AlertDialogTitle>
+          <AlertDialogDescription className="text-gray-400">
             {t.cancelConfirmDesc}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="bg-gray-200 hover:bg-gray-300 text-black">
+          <AlertDialogCancel className="bg-white/10 border-white/20 text-white hover:bg-white/20">
             {t.cancelDialog}
           </AlertDialogCancel>
           <AlertDialogAction
