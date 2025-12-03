@@ -20,6 +20,11 @@ A modern, professional vehicle booking system for schools with admin dashboard, 
 
 > **This is the working version!** The app is fully functional on Figma Make's hosting platform.
 
+**📚 Quick Reference:**
+- **[LIVE_URLS.md](./LIVE_URLS.md)** - All URLs, test accounts, and quick start
+- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - Complete deployment instructions
+- **[VERIFICATION_CHECKLIST.md](./VERIFICATION_CHECKLIST.md)** - Testing checklist (200+ tests)
+
 ### Test Accounts
 Try the app with these demo accounts:
 - **Admin**: `admin@school.edu` / `password123`
