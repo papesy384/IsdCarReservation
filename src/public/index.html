@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISD Car Reservation - Full-Stack App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #FFD700;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: #FFD700;
+            border-radius: 50%;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        
+        h1 {
+            color: #FFD700;
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #cccccc;
+            margin-bottom: 32px;
+        }
+        
+        .warning {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #FFD700;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        
+        .warning h2 {
+            color: #FFD700;
+            margin-bottom: 12px;
+            font-size: 1.5rem;
+        }
+        
+        .warning p {
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 32px 0;
+            text-align: left;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 3px solid #FFD700;
+        }
+        
+        .feature strong {
+            color: #FFD700;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: #FFD700;
+            color: #000000;
+            padding: 16px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin: 24px 8px 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 215, 0, 0.3);
+        }
+        
+        .cta-secondary {
+            background: transparent;
+            border: 2px solid #FFD700;
+            color: #FFD700;
+        }
+        
+        .tech-stack {
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .tech-stack ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .tech-stack li {
+            background: rgba(255, 215, 0, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .footer {
+            margin-top: 32px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 24px;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚗</div>
+        <h1>ISD Car Reservation</h1>
+        <p class="subtitle">Modern School Vehicle Booking System</p>
+        
+        <div class="warning">
+            <h2>⚠️ GitHub Pages Can't Host This App</h2>
+            <p><strong>Your code is perfect!</strong> This page is blank because GitHub Pages only supports simple HTML/CSS/JS files.</p>
+            <p>This is a <strong>full-stack application</strong> that requires:</p>
+            <ul style="text-align: left; margin: 16px 0; padding-left: 20px;">
+                <li>✅ Database (Supabase PostgreSQL)</li>
+                <li>✅ Backend API (Edge Functions)</li>
+                <li>✅ Authentication System</li>
+                <li>✅ Environment Variables</li>
+                <li>✅ Real-time Updates</li>
+            </ul>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <strong>📊 Admin Dashboard</strong>
+                <span>Reports, analytics, approvals, vehicle & user management</span>
+            </div>
+            <div class="feature">
+                <strong>📝 Employee Portal</strong>
+                <span>Book vehicles, view history, edit/cancel bookings</span>
+            </div>
+            <div class="feature">
+                <strong>🗺️ Driver Interface</strong>
+                <span>Map-centric design, assignments, trip completion</span>
+            </div>
+            <div class="feature">
+                <strong>🌍 Bilingual</strong>
+                <span>Full EN/FR language support</span>
+            </div>
+        </div>
+        
+        <a href="https://tcdrkhfd0dr3nv1ps73ge6.figma-make.dev" class="cta-button" target="_blank">
+            🚀 View Live App
+        </a>
+        
+        <a href="https://github.com/papesy384/IsdCarReservation" class="cta-button cta-secondary" target="_blank">
+            📦 View Source Code
+        </a>
+        
+        <div class="tech-stack">
+            <h3 style="color: #FFD700; margin-bottom: 16px;">Tech Stack</h3>
+            <ul>
+                <li>React</li>
+                <li>TypeScript</li>
+                <li>Tailwind CSS</li>
+                <li>Supabase</li>
+                <li>PostgreSQL</li>
+                <li>Edge Functions</li>
+                <li>Recharts</li>
+            </ul>
+        </div>
+        
+        <div class="footer">
+            <p>Built with Figma Make | Gold & Black Branding | Untitled UI Kit</p>
+            <p style="margin-top: 8px;">
+                Test Accounts: admin@school.edu / employee@school.edu / driver@school.edu
+                <br>Password: password123
+            </p>
+        </div>
+    </div>
+</body>
+</html>
