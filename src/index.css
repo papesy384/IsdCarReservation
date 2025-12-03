@@ -2249,20 +2249,8 @@
   }
 
   @media (hover: hover) {
-    .hover\:bg-\[\#FFD700\]\/10:hover {
-      background-color: oklab(88.6771% -.0169252 .181398 / .1);
-    }
-  }
-
-  @media (hover: hover) {
     .hover\:bg-\[\#FFD700\]\/20:hover {
       background-color: oklab(88.6771% -.0169252 .181398 / .2);
-    }
-  }
-
-  @media (hover: hover) {
-    .hover\:bg-\[\#FFD700\]\/90:hover {
-      background-color: oklab(88.6771% -.0169252 .181398 / .9);
     }
   }
 

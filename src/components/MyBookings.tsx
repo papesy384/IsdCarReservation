@@ -155,8 +155,16 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
     const matchesSearch = b.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           b.vehicleType.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'all' || b.status === filterStatus;
-    const matchesDateRange = !dateRange.from || !dateRange.to ||
-      (new Date(b.createdAt || 0) >= new Date(dateRange.from) && new Date(b.createdAt || 0) <= new Date(dateRange.to));
+    
+    // Date range filter - only apply if both dates are set
+    let matchesDateRange = true;
+    if (dateRange.from && dateRange.to && b.createdAt) {
+      const bookingDate = new Date(b.createdAt);
+      const fromDate = new Date(dateRange.from);
+      const toDate = new Date(dateRange.to);
+      matchesDateRange = bookingDate >= fromDate && bookingDate <= toDate;
+    }
+    
     return matchesSearch && matchesStatus && matchesDateRange;
   }).sort((a: any, b: any) => {
     const dateA = new Date(a.createdAt || 0).getTime();
@@ -230,7 +238,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
             />
             <Button
               variant="outline"
-              className="flex-1 border-2 border-[#FFD700] text-black hover:bg-[#FFD700]/10"
+              className="flex-1 bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-black hover:from-[#FFD700]/90 hover:to-[#FFA500]/90 shadow-lg shadow-[#FFD700]/20"
               onClick={() => exportBookingsToCSV(filteredBookings, language)}
             >
               <Download className="h-4 w-4 mr-2" />
@@ -344,73 +352,78 @@ function EditBookingDialog({ booking, onUpdate, t, language }: EditBookingDialog
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="flex-1 border-2 border-[#FFD700] text-black hover:bg-[#FFD700]/10"
+          className="flex-1 bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-black hover:from-[#FFD700]/90 hover:to-[#FFA500]/90 shadow-lg shadow-[#FFD700]/20 border-0"
         >
           <Edit className="h-4 w-4 mr-2" />
           {t.edit}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] bg-black/95 backdrop-blur-xl border-white/10">
         <DialogHeader>
-          <DialogTitle>{t.editBooking}</DialogTitle>
+          <DialogTitle className="text-white">{t.editBooking}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="date">{t.date}</Label>
+            <Label htmlFor="date" className="text-white">{t.date}</Label>
             <Input
               id="date"
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
               min={new Date().toISOString().split('T')[0]}
+              className="bg-white/10 border-white/20 text-white"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="time">{t.time}</Label>
+            <Label htmlFor="time" className="text-white">{t.time}</Label>
             <Input
               id="time"
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
+              className="bg-white/10 border-white/20 text-white"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="destination">{t.destination}</Label>
+            <Label htmlFor="destination" className="text-white">{t.destination}</Label>
             <Input
               id="destination"
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
+              className="bg-white/10 border-white/20 text-white"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="passengers">{t.numPassengers}</Label>
+            <Label htmlFor="passengers" className="text-white">{t.numPassengers}</Label>
             <Input
               id="passengers"
               type="number"
               value={passengers}
               onChange={(e) => setPassengers(Number(e.target.value))}
+              className="bg-white/10 border-white/20 text-white"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="vehicleType">{t.vehicleType}</Label>
+            <Label htmlFor="vehicleType" className="text-white">{t.vehicleType}</Label>
             <Select value={vehicleType} onValueChange={(value) => setVehicleType(value)}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-white/10 border-white/20 text-white">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Sedan">Sedan</SelectItem>
-                <SelectItem value="SUV">SUV</SelectItem>
-                <SelectItem value="Minibus">Minibus</SelectItem>
-                <SelectItem value="Bus">Bus</SelectItem>
+              <SelectContent className="bg-black/95 backdrop-blur-xl border-white/10">
+                <SelectItem value="Sedan" className="text-white hover:bg-white/10">Sedan</SelectItem>
+                <SelectItem value="SUV" className="text-white hover:bg-white/10">SUV</SelectItem>
+                <SelectItem value="Minibus" className="text-white hover:bg-white/10">Minibus</SelectItem>
+                <SelectItem value="Bus" className="text-white hover:bg-white/10">Bus</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="purpose">{t.purpose}</Label>
+            <Label htmlFor="purpose" className="text-white">{t.purpose}</Label>
             <Textarea
               id="purpose"
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
+              className="bg-white/10 border-white/20 text-white"
             />
           </div>
         </div>
@@ -419,14 +432,14 @@ function EditBookingDialog({ booking, onUpdate, t, language }: EditBookingDialog
             type="button"
             variant="outline"
             onClick={() => setIsOpen(false)}
-            className="bg-gray-200 hover:bg-gray-300 text-black"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20"
           >
             {t.cancelDialog}
           </Button>
           <Button
             type="button"
             onClick={handleSave}
-            className="bg-[#FFD700] hover:bg-[#FFD700]/90 text-black"
+            className="bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-black hover:from-[#FFD700]/90 hover:to-[#FFA500]/90"
           >
             {t.saveChanges}
           </Button>
