@@ -7,7 +7,6 @@ import { Language } from '../App';
 import { AlertCircle, Loader2, Mail, Lock, Eye, EyeOff, CheckCircle2, Globe } from 'lucide-react';
 import { Alert, AlertDescription } from './ui/alert';
 import { authAPI, supabase } from '../utils/api';
-import schoolLogo from 'figma:asset/4bd846bf67c44fcbc0a58285b6a6f879210a7b3c.png';
 
 interface LoginProps {
   onLogin: (accessToken: string) => void;
@@ -131,7 +130,7 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#FFD700]/20">
-                <img src={schoolLogo} alt="ISD Logo" className="w-10 h-10 object-contain" />
+                <span className="text-3xl">🚗</span>
               </div>
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-[#FFD700] via-[#FFD700] to-white bg-clip-text text-transparent">
@@ -197,7 +196,7 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-[#FFD700]/20">
-              <img src={schoolLogo} alt="ISD Logo" className="w-10 h-10 object-contain" />
+              <span className="text-3xl">🚗</span>
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-[#FFD700] via-[#FFD700] to-white bg-clip-text text-transparent">
               {t.title}

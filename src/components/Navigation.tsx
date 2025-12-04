@@ -2,7 +2,6 @@ import { Menu, LogOut, Globe } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { UserRole, Language } from '../App';
-import schoolLogo from 'figma:asset/4bd846bf67c44fcbc0a58285b6a6f879210a7b3c.png';
 
 interface NavigationProps {
   currentPage: string;
@@ -72,7 +71,7 @@ export function Navigation({ currentPage, setCurrentPage, userRole, userName, la
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-xl flex items-center justify-center shadow-lg shadow-[#FFD700]/20">
-              <img src={schoolLogo} alt="School Logo" className="h-6 w-6 object-contain" />
+              <span className="text-xl">🚗</span>
             </div>
             <span className="text-xl font-semibold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent">ISD Car Reservation</span>
           </div>
@@ -131,7 +130,9 @@ export function Navigation({ currentPage, setCurrentPage, userRole, userName, la
               <SheetContent side="right" className="bg-black text-white border-l border-white/10">
                 <div className="flex flex-col h-full">
                   <div className="flex items-center gap-3 mb-8">
-                    <img src={schoolLogo} alt="School Logo" className="h-10 w-10 object-contain" />
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-xl flex items-center justify-center">
+                      <span className="text-xl">🚗</span>
+                    </div>
                     <span>ISD Car Reservation</span>
                   </div>
                   <NavContent />

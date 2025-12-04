@@ -1668,10 +1668,6 @@
     background-clip: text;
   }
 
-  .object-contain {
-    object-fit: contain;
-  }
-
   .p-0 {
     padding: calc(var(--spacing) * 0);
   }
