@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Alert, AlertDescription } from './ui/alert';
+import { authAPI, supabase } from '../utils/api';
+import { ImageWithFallback } from './figma/ImageWithFallback';
+import schoolLogo from 'figma:asset/4bd846bf67c44fcbc0a58285b6a6f879210a7b3c.png';
+import { AnimatedBackground } from './AnimatedBackground';
+import { Language } from '../App';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Language } from '../App';
-import { AlertCircle, Loader2, Mail, Lock, Eye, EyeOff, CheckCircle2, Globe } from 'lucide-react';
-import { Alert, AlertDescription } from './ui/alert';
-import { authAPI, supabase } from '../utils/api';
+import { Mail, Lock, Loader2, Eye, EyeOff, Globe, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface LoginProps {
   onLogin: (accessToken: string) => void;
@@ -114,15 +117,7 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
       )}
 
       {/* Animated Background */}
-      <div className="absolute inset-0">
-        {/* Gradient Orbs */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-[#FFD700]/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#FFD700]/10 rounded-full blur-3xl animate-pulse delay-700" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#FFD700]/5 rounded-full blur-3xl animate-pulse delay-1000" />
-        
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,215,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,215,0,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
-      </div>
+      <AnimatedBackground />
 
       <div className="w-full max-w-6xl relative z-10 grid lg:grid-cols-2 gap-8 items-center">
         {/* Left Side - Branding & Info */}
@@ -130,7 +125,7 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#FFD700]/20">
-                <span className="text-3xl">🚗</span>
+                <ImageWithFallback src={schoolLogo} alt="ISD Logo" className="w-10 h-10 object-contain" />
               </div>
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-[#FFD700] via-[#FFD700] to-white bg-clip-text text-transparent">
@@ -196,7 +191,7 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-[#FFD700]/20">
-              <span className="text-3xl">🚗</span>
+              <ImageWithFallback src={schoolLogo} alt="ISD Logo" className="w-10 h-10 object-contain" />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-[#FFD700] via-[#FFD700] to-white bg-clip-text text-transparent">
               {t.title}
