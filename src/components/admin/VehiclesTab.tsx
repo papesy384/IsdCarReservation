@@ -12,6 +12,7 @@ import { useVehicles } from '../../hooks/useBackend';
 import { vehicleAPI } from '../../utils/api';
 import { ConfirmDialog } from '../ConfirmDialog';
 import { exportVehiclesToCSV } from '../../utils/export';
+import { BookingListSkeleton } from '../ui/loading-skeletons';
 
 interface Vehicle {
   id: string;
@@ -187,12 +188,7 @@ export function VehiclesTab({ language }: { language: Language }) {
   );
 
   if (loading) {
-    return (
-      <div className="text-center py-12">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#FFD700] border-r-transparent"></div>
-        <p className="mt-4 text-gray-400">Loading vehicles...</p>
-      </div>
-    );
+    return <BookingListSkeleton count={5} />;
   }
 
   return (

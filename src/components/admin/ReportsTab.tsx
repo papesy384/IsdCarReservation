@@ -7,6 +7,7 @@ import { Language } from '../../App';
 import { useState, useEffect } from 'react';
 import { bookingAPI } from '../../utils/api';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { StatsCardsSkeleton, Skeleton } from '../ui/loading-skeletons';
 
 const translations = {
   en: {
@@ -95,10 +96,17 @@ export function ReportsTab({ language }: { language: Language }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#FFD700] border-r-transparent"></div>
-          <p className="mt-4 text-gray-400">{t.loading}</p>
+      <div className="space-y-8">
+        <StatsCardsSkeleton />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="p-6">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <Skeleton className="h-64 w-full" />
+          </Card>
+          <Card className="p-6">
+            <Skeleton className="h-6 w-32 mb-4" />
+            <Skeleton className="h-64 w-full" />
+          </Card>
         </div>
       </div>
     );

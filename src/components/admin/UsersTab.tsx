@@ -12,6 +12,7 @@ import { useUsers } from '../../hooks/useBackend';
 import { userAPI } from '../../utils/api';
 import { ConfirmDialog } from '../ConfirmDialog';
 import { exportUsersToCSV } from '../../utils/export';
+import { BookingListSkeleton } from '../ui/loading-skeletons';
 
 interface UserData {
   id: string;
@@ -125,12 +126,7 @@ export function UsersTab({ language }: { language: Language }) {
   };
 
   if (loading) {
-    return (
-      <div className="text-center py-12">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#FFD700] border-r-transparent"></div>
-        <p className="mt-4 text-gray-600">Loading users...</p>
-      </div>
-    );
+    return <BookingListSkeleton count={5} />;
   }
 
   const UserForm = ({ onSubmit }: { onSubmit: () => void }) => (
