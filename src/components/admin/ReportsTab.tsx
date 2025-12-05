@@ -7,7 +7,8 @@ import { Language } from '../../App';
 import { useState, useEffect } from 'react';
 import { bookingAPI } from '../../utils/api';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { StatsCardsSkeleton, Skeleton } from '../ui/loading-skeletons';
+import { StatsCardsSkeleton } from '../ui/loading-skeletons';
+import { Skeleton } from '../ui/skeleton';
 
 const translations = {
   en: {

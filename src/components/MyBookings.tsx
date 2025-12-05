@@ -15,7 +15,8 @@ import { toast } from 'sonner@2.0.3';
 import { DateRangePicker, DateRange } from './DateRangePicker';
 import { exportBookingsToCSV } from '../utils/export';
 import { EmptyState } from './ui/empty-state';
-import { BookingListSkeleton, StatsCardsSkeleton, Skeleton } from './ui/loading-skeletons';
+import { BookingListSkeleton, StatsCardsSkeleton } from './ui/loading-skeletons';
+import { Skeleton } from './ui/skeleton';
 
 interface Booking {
   id: string;
