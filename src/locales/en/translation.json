@@ -48,6 +48,14 @@
     "submit": "Submit Booking Request",
     "success": "Booking request submitted successfully!",
     "minAdvanceBooking": "Reservations must be made at least 24 hours in advance"
+  },
+  "admin": {
+    "admin_dashboard_title": "Admin Overview Dashboard",
+    "dashboard_subtitle": "Manage your fleet, users, and bookings",
+    "pendingApprovals": "Pending Approvals",
+    "vehicleManagement": "Vehicle Management",
+    "userManagement": "User Management",
+    "reports": "Reports"
   }
 }
 

@@ -48,6 +48,14 @@
     "submit": "Soumettre la demande de réservation",
     "success": "Demande de réservation soumise avec succès!",
     "minAdvanceBooking": "Les réservations doivent être effectuées au moins 24 heures à l'avance"
+  },
+  "admin": {
+    "admin_dashboard_title": "Tableau de Bord Administrateur",
+    "dashboard_subtitle": "Gérez votre flotte, vos utilisateurs et vos réservations",
+    "pendingApprovals": "Approbations en attente",
+    "vehicleManagement": "Gestion des véhicules",
+    "userManagement": "Gestion des utilisateurs",
+    "reports": "Rapports"
   }
 }
 
