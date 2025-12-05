@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Alert, AlertDescription } from './ui/alert';
+import { authAPI, supabase } from '../utils/api';
+import { ImageWithFallback } from './figma/ImageWithFallback';
+import schoolLogo from 'figma:asset/4bd846bf67c44fcbc0a58285b6a6f879210a7b3c.png';
+import { AnimatedBackground } from './AnimatedBackground';
+import { Language } from '../App';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Language } from '../App';
-import { AlertCircle, Loader2, Mail, Lock, Eye, EyeOff, CheckCircle2, Globe } from 'lucide-react';
-import { Alert, AlertDescription } from './ui/alert';
-import { authAPI, supabase } from '../utils/api';
-import { AnimatedBackground } from './AnimatedBackground';
+import { Mail, Lock, Loader2, Eye, EyeOff, Globe, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface LoginProps {
   onLogin: (accessToken: string) => void;
@@ -122,8 +124,8 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
         <div className="hidden lg:block space-y-8 text-white">
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-black/50 backdrop-blur-sm border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl">
-                <img src="/images/SchoolLogo.png" alt="ISD Logo" className="w-12 h-12 object-contain" />
+              <div className="w-16 h-16 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#FFD700]/20">
+                <ImageWithFallback src={schoolLogo} alt="ISD Logo" className="w-10 h-10 object-contain" />
               </div>
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-[#FFD700] via-[#FFD700] to-white bg-clip-text text-transparent">
@@ -188,8 +190,8 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
         <div className="w-full max-w-md mx-auto">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
-            <div className="w-16 h-16 bg-black/50 backdrop-blur-sm border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl">
-              <img src="/images/SchoolLogo.png" alt="ISD Logo" className="w-12 h-12 object-contain" />
+            <div className="w-16 h-16 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-[#FFD700]/20">
+              <ImageWithFallback src={schoolLogo} alt="ISD Logo" className="w-10 h-10 object-contain" />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-[#FFD700] via-[#FFD700] to-white bg-clip-text text-transparent">
               {t.title}

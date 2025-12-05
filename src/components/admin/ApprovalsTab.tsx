@@ -13,6 +13,8 @@ import { usePendingBookings } from '../../hooks/useBackend';
 import { bookingAPI } from '../../utils/api';
 import { useState } from 'react';
 import { exportBookingsToCSV } from '../../utils/export';
+import { EmptyState } from '../ui/empty-state';
+import { TableSkeleton } from '../ui/skeleton';
 
 interface BookingRequest {
   id: string;
@@ -55,6 +57,15 @@ const translations = {
     searchPlaceholder: 'Search by name, destination, or department...',
     filterByDept: 'All Departments',
     results: 'results',
+    emptyTitle: 'All caught up!',
+    emptyDescription: 'No pending booking approvals at the moment. New requests will appear here.',
+    selectAll: 'Select All',
+    deselectAll: 'Deselect All',
+    selected: 'selected',
+    bulkApprove: 'Approve Selected',
+    bulkDeny: 'Deny Selected',
+    approving: 'Approving...',
+    denying: 'Denying...',
   },
   fr: {
     noPending: 'Aucune approbation en attente',
@@ -82,6 +93,15 @@ const translations = {
     searchPlaceholder: 'Rechercher par nom, destination ou département...',
     filterByDept: 'Tous les départements',
     results: 'résultats',
+    emptyTitle: 'Tout est à jour!',
+    emptyDescription: 'Aucune approbation de réservation en attente pour le moment. Les nouvelles demandes apparaîtront ici.',
+    selectAll: 'Tout sélectionner',
+    deselectAll: 'Tout désélectionner',
+    selected: 'sélectionné(s)',
+    bulkApprove: 'Approuver la sélection',
+    bulkDeny: 'Refuser la sélection',
+    approving: 'Approbation...',
+    denying: 'Refus...',
   },
 };
 
@@ -90,36 +110,97 @@ export function ApprovalsTab({ language }: { language: Language }) {
   const { bookings: requests, loading, refetch } = usePendingBookings();
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [selectedRequests, setSelectedRequests] = useState<Set<string>>(new Set());
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleApprove = async (id: string) => {
+    setIsProcessing(true);
     const bookingId = id.replace('booking:', '');
     const response = await bookingAPI.updateStatus(bookingId, 'approved');
     
     if (response.success) {
       toast.success(t.approved);
-      refetch(); // Refresh the list
+      refetch();
     } else {
       toast.error('Failed to approve booking');
     }
+    setIsProcessing(false);
+  };
+
+  const handleBulkApprove = async () => {
+    setIsProcessing(true);
+    const promises = Array.from(selectedRequests).map(id => {
+      const bookingId = id.replace('booking:', '');
+      return bookingAPI.updateStatus(bookingId, 'approved');
+    });
+    
+    try {
+      await Promise.all(promises);
+      toast.success(`${selectedRequests.size} ${t.approved}`);
+      setSelectedRequests(new Set());
+      refetch();
+    } catch (error) {
+      toast.error('Failed to approve some bookings');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleBulkDeny = async () => {
+    setIsProcessing(true);
+    const promises = Array.from(selectedRequests).map(id => {
+      const bookingId = id.replace('booking:', '');
+      return bookingAPI.updateStatus(bookingId, 'denied');
+    });
+    
+    try {
+      await Promise.all(promises);
+      toast.success(`${selectedRequests.size} ${t.denied}`);
+      setSelectedRequests(new Set());
+      refetch();
+    } catch (error) {
+      toast.error('Failed to deny some bookings');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedRequests.size === filteredRequests.length) {
+      setSelectedRequests(new Set());
+    } else {
+      setSelectedRequests(new Set(filteredRequests.map(r => r.id)));
+    }
+  };
+
+  const toggleRequestSelection = (id: string) => {
+    const newSelected = new Set(selectedRequests);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedRequests(newSelected);
   };
 
   const handleDeny = async (id: string) => {
+    setIsProcessing(true);
     const bookingId = id.replace('booking:', '');
     const response = await bookingAPI.updateStatus(bookingId, 'denied');
     
     if (response.success) {
       toast.error(t.denied);
-      refetch(); // Refresh the list
+      refetch();
     } else {
       toast.error('Failed to deny booking');
     }
+    setIsProcessing(false);
   };
 
   if (loading) {
     return (
-      <div className="text-center py-12">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#FFD700] border-r-transparent"></div>
-        <p className="mt-4 text-gray-600">Loading approvals...</p>
+      <div className="space-y-6">
+        <TableSkeleton rows={3} />
       </div>
     );
   }
@@ -145,21 +226,106 @@ export function ApprovalsTab({ language }: { language: Language }) {
   const sortedRequests = [...filteredRequests].sort((a: any, b: any) => {
     const dateA = new Date(a.createdAt || 0).getTime();
     const dateB = new Date(b.createdAt || 0).getTime();
-    return dateB - dateA; // Descending order (newest first)
+    return dateB - dateA;
   });
 
   if (pendingRequests.length === 0) {
     return (
-      <div className="text-center py-12 text-gray-500">
-        <p className="text-xl">{t.noPending}</p>
-      </div>
+      <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
+        <EmptyState
+          icon={CheckSquare}
+          title={t.emptyTitle}
+          description={t.emptyDescription}
+        />
+      </Card>
     );
   }
 
   return (
     <div className="space-y-6">
+      {/* Bulk Actions Toolbar */}
+      {selectedRequests.size > 0 && (
+        <Card className="p-4 border border-[#FFD700] bg-[#FFD700]/10 backdrop-blur-xl shadow-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <CheckSquare className="h-5 w-5 text-[#FFD700]" />
+              <span className="text-white font-medium">
+                {selectedRequests.size} {t.selected}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={handleBulkApprove}
+                disabled={isProcessing}
+                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    {t.approving}
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    {t.bulkApprove}
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleBulkDeny}
+                disabled={isProcessing}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    {t.denying}
+                  </>
+                ) : (
+                  <>
+                    <X className="h-4 w-4 mr-2" />
+                    {t.bulkDeny}
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedRequests(new Set())}
+                className="text-white hover:bg-white/10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Search and Filter Bar */}
       <div className="flex flex-col md:flex-row gap-4">
+        {filteredRequests.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleSelectAll}
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 md:w-auto w-full"
+          >
+            {selectedRequests.size === filteredRequests.length ? (
+              <>
+                <Square className="h-4 w-4 mr-2" />
+                {t.deselectAll}
+              </>
+            ) : (
+              <>
+                <CheckSquare className="h-4 w-4 mr-2" />
+                {t.selectAll}
+              </>
+            )}
+          </Button>
+        )}
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           <Input
@@ -167,19 +333,19 @@ export function ApprovalsTab({ language }: { language: Language }) {
             placeholder={t.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-12 border-2 border-gray-200 focus:border-[#FFD700]"
+            className="pl-10 h-12 bg-white/10 border-white/20 text-white placeholder:text-gray-500 focus:border-[#FFD700]"
           />
         </div>
         <div className="w-full md:w-64">
           <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-            <SelectTrigger className="h-12 border-2 border-gray-200 focus:border-[#FFD700]">
-              <Filter className="h-4 w-4 mr-2" />
+            <SelectTrigger className="h-12 bg-white/10 border-white/20 text-white focus:border-[#FFD700]">
+              <Filter className="h-4 w-4 mr-2 text-[#FFD700]" />
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t.filterByDept}</SelectItem>
+            <SelectContent className="bg-black/95 backdrop-blur-xl border-white/10">
+              <SelectItem value="all" className="text-white hover:bg-white/10">{t.filterByDept}</SelectItem>
               {departments.map(dept => (
-                <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                <SelectItem key={dept} value={dept} className="text-white hover:bg-white/10">{dept}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -187,7 +353,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
         <Button
           onClick={refetch}
           variant="outline"
-          className="h-12 px-6 border-2 border-gray-200 hover:bg-gray-50"
+          className="h-12 px-6 bg-white/10 border-white/20 text-white hover:bg-white/20"
           title="Refresh bookings"
         >
           <RefreshCw className="h-5 w-5" />
@@ -196,100 +362,137 @@ export function ApprovalsTab({ language }: { language: Language }) {
 
       {/* Results Count */}
       {(searchQuery || departmentFilter !== 'all') && (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-400">
           {filteredRequests.length} {t.results}
         </div>
       )}
 
       {/* Bookings Grid */}
       {filteredRequests.length === 0 ? (
-        <div className="text-center py-12 text-gray-400">
-          <p className="text-xl">No approvals match your filters</p>
-        </div>
+        <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
+          <EmptyState
+            icon={Search}
+            title="No approvals match your filters"
+            description="Try adjusting your search or filter criteria"
+            secondaryActionLabel="Clear Filters"
+            onSecondaryAction={() => {
+              setSearchQuery('');
+              setDepartmentFilter('all');
+            }}
+          />
+        </Card>
       ) : (
         <div className="grid gap-6">
           {sortedRequests.map((request) => (
-            <Card key={request.id} className="p-6 border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-xl text-white mb-1">
-                    {t.requestFrom} <span className="font-semibold text-[#FFD700]">{request.employeeName}</span>
-                  </h3>
-                  <p className="text-gray-400">{t.department}: {request.department}</p>
+            <Card key={request.id} className="p-6 border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg hover:bg-white/10 transition-all group">
+              <div className="flex gap-4">
+                {/* Selection Checkbox */}
+                <div className="flex items-start pt-1">
+                  <button
+                    onClick={() => toggleRequestSelection(request.id)}
+                    className="p-1 rounded hover:bg-white/10 transition-colors"
+                  >
+                    {selectedRequests.has(request.id) ? (
+                      <CheckSquare className="h-5 w-5 text-[#FFD700]" />
+                    ) : (
+                      <Square className="h-5 w-5 text-gray-400" />
+                    )}
+                  </button>
                 </div>
-                <StatusBadge status={request.status} />
+
+                <div className="flex-1">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="text-xl text-white mb-1">
+                        {t.requestFrom} <span className="font-semibold text-[#FFD700]">{request.employeeName}</span>
+                      </h3>
+                      <p className="text-gray-400">{t.department}: {request.department}</p>
+                    </div>
+                    <StatusBadge status={request.status} />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="h-5 w-5 text-[#FFD700]" />
+                      <div>
+                        <p className="text-sm text-gray-400">{t.dateTime}</p>
+                        <p className="text-white">{request.date} at {request.time}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <MapPin className="h-5 w-5 text-[#FFD700]" />
+                      <div>
+                        <p className="text-sm text-gray-400">{t.destination}</p>
+                        <p className="text-white">{request.destination}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Users className="h-5 w-5 text-[#FFD700]" />
+                      <div>
+                        <p className="text-sm text-gray-400">{t.passengers}</p>
+                        <p className="text-white">{request.passengers}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-sm text-gray-400">{t.vehicleType}</p>
+                      <p className="text-white">{request.vehicleType}</p>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <p className="text-sm text-gray-400">{t.purpose}</p>
+                      <p className="text-white">{request.purpose}</p>
+                    </div>
+                  </div>
+
+                  {request.status === 'pending' && (
+                    <div className="flex gap-3">
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white h-12 shadow-lg"
+                            disabled={isProcessing}
+                          >
+                            {isProcessing ? (
+                              <>
+                                <div className="h-5 w-5 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                {t.approving}
+                              </>
+                            ) : (
+                              <>
+                                <Check className="h-5 w-5 mr-2" />
+                                {t.approve}
+                              </>
+                            )}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-black/95 backdrop-blur-xl border-white/10">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-white">{t.approveConfirmTitle}</AlertDialogTitle>
+                            <AlertDialogDescription className="text-gray-400">
+                              {t.approveConfirmDesc}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="bg-white/10 hover:bg-white/20 text-white border-white/20">
+                              {t.cancel}
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleApprove(request.id)}
+                              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                            >
+                              {t.confirmApprove}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                      <DenyDialog requestId={request.id} onDeny={handleDeny} t={t} isProcessing={isProcessing} />
+                    </div>
+                  )}
+                </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-[#FFD700]" />
-                  <div>
-                    <p className="text-sm text-gray-400">{t.dateTime}</p>
-                    <p className="text-white">{request.date} at {request.time}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-[#FFD700]" />
-                  <div>
-                    <p className="text-sm text-gray-400">{t.destination}</p>
-                    <p className="text-white">{request.destination}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-[#FFD700]" />
-                  <div>
-                    <p className="text-sm text-gray-400">{t.passengers}</p>
-                    <p className="text-white">{request.passengers}</p>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-400">{t.vehicleType}</p>
-                  <p className="text-white">{request.vehicleType}</p>
-                </div>
-
-                <div className="md:col-span-2">
-                  <p className="text-sm text-gray-400">{t.purpose}</p>
-                  <p className="text-white">{request.purpose}</p>
-                </div>
-              </div>
-
-              {request.status === 'pending' && (
-                <div className="flex gap-3">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white h-12 shadow-lg"
-                      >
-                        <Check className="h-5 w-5 mr-2" />
-                        {t.approve}
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="bg-black/95 backdrop-blur-xl border-white/10">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle className="text-white">{t.approveConfirmTitle}</AlertDialogTitle>
-                        <AlertDialogDescription className="text-gray-400">
-                          {t.approveConfirmDesc}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel className="bg-white/10 hover:bg-white/20 text-white border-white/20">
-                          {t.cancel}
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleApprove(request.id)}
-                          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
-                        >
-                          {t.confirmApprove}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                  <DenyDialog requestId={request.id} onDeny={handleDeny} t={t} />
-                </div>
-              )}
             </Card>
           ))}
         </div>
@@ -302,9 +505,10 @@ interface DenyDialogProps {
   requestId: string;
   onDeny: (id: string) => void;
   t: typeof translations['en'];
+  isProcessing: boolean;
 }
 
-function DenyDialog({ requestId, onDeny, t }: DenyDialogProps) {
+function DenyDialog({ requestId, onDeny, t, isProcessing }: DenyDialogProps) {
   const [reason, setReason] = useState('');
 
   return (
@@ -313,9 +517,19 @@ function DenyDialog({ requestId, onDeny, t }: DenyDialogProps) {
         <Button
           variant="destructive"
           className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 h-12 shadow-lg"
+          disabled={isProcessing}
         >
-          <X className="h-5 w-5 mr-2" />
-          {t.deny}
+          {isProcessing ? (
+            <>
+              <div className="h-5 w-5 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              {t.denying}
+            </>
+          ) : (
+            <>
+              <X className="h-5 w-5 mr-2" />
+              {t.deny}
+            </>
+          )}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="bg-black/95 backdrop-blur-xl border-white/10">

@@ -6,6 +6,8 @@ import { toast } from 'sonner@2.0.3';
 import { Language } from '../App';
 import { useDriverTrips } from '../hooks/useBackend';
 import { driverAPI } from '../utils/api';
+import { EmptyState } from './ui/empty-state';
+import { CardSkeleton } from './ui/skeleton';
 
 interface Trip {
   id: string;
@@ -38,6 +40,8 @@ const translations = {
     tripStarted: 'Trip started',
     tripCompleted: 'Trip completed successfully',
     noTrips: 'No trips scheduled',
+    emptyTitle: 'No trips scheduled today',
+    emptyDescription: 'When trips are assigned to you, they will appear here. Check back later or contact dispatch.',
   },
   fr: {
     title: 'Tableau de bord du conducteur',
@@ -57,6 +61,8 @@ const translations = {
     tripStarted: 'Voyage commencé',
     tripCompleted: 'Voyage terminé avec succès',
     noTrips: 'Aucun voyage prévu',
+    emptyTitle: 'Aucun voyage prévu aujourd\'hui',
+    emptyDescription: 'Lorsque des voyages vous sont attribués, ils apparaîtront ici. Revenez plus tard ou contactez la répartition.',
   },
 };
 
@@ -96,9 +102,13 @@ export function DriverInterface({ language }: { language: Language }) {
     return (
       <div className="min-h-screen py-4 md:py-8 px-4">
         <div className="container mx-auto max-w-2xl">
-          <div className="text-center py-12">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#FFD700] border-r-transparent"></div>
-            <p className="mt-4 text-gray-400">Loading trips...</p>
+          <div className="mb-6">
+            <div className="h-10 w-48 bg-white/10 rounded-lg animate-pulse mb-2"></div>
+            <div className="h-5 w-64 bg-white/5 rounded animate-pulse"></div>
+          </div>
+          <div className="space-y-4">
+            <CardSkeleton />
+            <CardSkeleton />
           </div>
         </div>
       </div>
@@ -110,7 +120,7 @@ export function DriverInterface({ language }: { language: Language }) {
     id: booking.id,
     requestor: booking.employeeName || 'Unknown',
     phone: booking.phone || '',
-    pickupLocation: 'School Campus', // TODO: Add pickup location to booking data
+    pickupLocation: 'School Campus',
     destination: booking.destination,
     scheduledTime: booking.time,
     passengers: booking.passengers,
@@ -121,6 +131,27 @@ export function DriverInterface({ language }: { language: Language }) {
   const upcomingTrips = mappedTrips.filter(t => t.status === 'upcoming').sort((a, b) => a.order - b.order);
   const inProgressTrips = mappedTrips.filter(t => t.status === 'in-progress');
   const completedTrips = mappedTrips.filter(t => t.status === 'completed');
+
+  // Show empty state if no trips
+  if (mappedTrips.length === 0) {
+    return (
+      <div className="min-h-screen py-4 md:py-8 px-4">
+        <div className="container mx-auto max-w-2xl">
+          <div className="mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent mb-2">{t.title}</h1>
+            <p className="text-gray-400">Manage your daily trips and deliveries</p>
+          </div>
+          <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
+            <EmptyState
+              icon={MapPin}
+              title={t.emptyTitle}
+              description={t.emptyDescription}
+            />
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   const TripCard = ({ trip }: { trip: Trip }) => (
     <Card className="p-5 border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg hover:bg-white/10 transition-all">
@@ -262,15 +293,6 @@ export function DriverInterface({ language }: { language: Language }) {
               {completedTrips.map(trip => <TripCard key={trip.id} trip={trip} />)}
             </div>
           </div>
-        )}
-
-        {trips.length === 0 && (
-          <Card className="p-12 border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
-            <div className="text-center">
-              <MapPin className="h-16 w-16 text-gray-500 mx-auto mb-4" />
-              <p className="text-xl text-gray-400">{t.noTrips}</p>
-            </div>
-          </Card>
         )}
       </div>
     </div>

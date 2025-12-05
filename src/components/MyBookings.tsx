@@ -14,6 +14,8 @@ import { bookingAPI } from '../utils/api';
 import { toast } from 'sonner@2.0.3';
 import { DateRangePicker, DateRange } from './DateRangePicker';
 import { exportBookingsToCSV } from '../utils/export';
+import { EmptyState } from './ui/empty-state';
+import { TableSkeleton } from './ui/skeleton';
 
 interface Booking {
   id: string;
@@ -62,6 +64,15 @@ const translations = {
     totalBookings: 'Total Bookings',
     actions: 'Actions',
     export: 'Export Bookings',
+    emptyTitle: 'No bookings yet',
+    emptyDescription: 'You haven\'t made any booking requests yet. Create your first booking to get started.',
+    emptyAction: 'Create Booking',
+    selectAll: 'Select All',
+    deselectAll: 'Deselect All',
+    selected: 'selected',
+    bulkCancel: 'Cancel Selected',
+    bulkExport: 'Export Selected',
+    cancelling: 'Cancelling...',
   },
   fr: {
     title: 'Mes réservations',
@@ -97,6 +108,15 @@ const translations = {
     totalBookings: 'Total des réservations',
     actions: 'Actions',
     export: 'Exporter les réservations',
+    emptyTitle: 'Aucune réservation',
+    emptyDescription: 'Vous n\'avez pas encore fait de demande de réservation. Créez votre première réservation pour commencer.',
+    emptyAction: 'Créer une réservation',
+    selectAll: 'Tout sélectionner',
+    deselectAll: 'Tout désélectionner',
+    selected: 'sélectionné(s)',
+    bulkCancel: 'Annuler la sélection',
+    bulkExport: 'Exporter la sélection',
+    cancelling: 'Annulation...',
   },
 };
 
@@ -106,8 +126,11 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [dateRange, setDateRange] = useState<DateRange>({ from: '', to: '' });
+  const [selectedBookings, setSelectedBookings] = useState<Set<string>>(new Set());
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const handleCancel = async (id: string) => {
+    setIsCancelling(true);
     const bookingId = id.replace('booking:', '');
     const response = await bookingAPI.cancel(bookingId);
     
@@ -117,6 +140,44 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
     } else {
       toast.error('Failed to cancel booking');
     }
+    setIsCancelling(false);
+  };
+
+  const handleBulkCancel = async () => {
+    setIsCancelling(true);
+    const promises = Array.from(selectedBookings).map(id => {
+      const bookingId = id.replace('booking:', '');
+      return bookingAPI.cancel(bookingId);
+    });
+    
+    try {
+      await Promise.all(promises);
+      toast.success(`${selectedBookings.size} ${t.cancelled_msg}`);
+      setSelectedBookings(new Set());
+      refetch();
+    } catch (error) {
+      toast.error('Failed to cancel some bookings');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedBookings.size === filteredBookings.length) {
+      setSelectedBookings(new Set());
+    } else {
+      setSelectedBookings(new Set(filteredBookings.map(b => b.id)));
+    }
+  };
+
+  const toggleBookingSelection = (id: string) => {
+    const newSelected = new Set(selectedBookings);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedBookings(newSelected);
   };
 
   const handleEdit = (id: string) => {
@@ -132,10 +193,11 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
     return (
       <div className="min-h-screen py-8 px-4">
         <div className="container mx-auto">
-          <div className="text-center py-12">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#FFD700] border-r-transparent"></div>
-            <p className="mt-4 text-gray-400">Loading your bookings...</p>
+          <div className="mb-8">
+            <div className="h-10 w-48 bg-white/10 rounded-lg animate-pulse mb-2"></div>
+            <div className="h-5 w-64 bg-white/5 rounded animate-pulse"></div>
           </div>
+          <TableSkeleton rows={5} />
         </div>
       </div>
     );
@@ -170,6 +232,29 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
     return dateB - dateA;
   });
 
+  // Show empty state if no bookings at all
+  if (bookings.length === 0) {
+    return (
+      <div className="min-h-screen py-8 px-4">
+        <div className="container mx-auto">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent mb-2">{t.title}</h1>
+            <p className="text-gray-400">View and manage your booking requests</p>
+          </div>
+          <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
+            <EmptyState
+              icon={Calendar}
+              title={t.emptyTitle}
+              description={t.emptyDescription}
+              actionLabel={t.emptyAction}
+              onAction={() => toast.info('Navigate to booking form')}
+            />
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="container mx-auto">
@@ -202,9 +287,84 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
           </Card>
         </div>
 
+        {/* Bulk Actions Toolbar */}
+        {selectedBookings.size > 0 && (
+          <Card className="p-4 border border-[#FFD700] bg-[#FFD700]/10 backdrop-blur-xl shadow-lg mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <CheckCircle className="h-5 w-5 text-[#FFD700]" />
+                <span className="text-white font-medium">
+                  {selectedBookings.size} {t.selected}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => exportBookingsToCSV(
+                    filteredBookings.filter(b => selectedBookings.has(b.id)),
+                    language
+                  )}
+                  className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {t.bulkExport}
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkCancel}
+                  disabled={isCancelling}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {isCancelling ? (
+                    <>
+                      <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      {t.cancelling}
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {t.bulkCancel}
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedBookings(new Set())}
+                  className="text-white hover:bg-white/10"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Search and Filter */}
         <Card className="p-6 border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg mb-6">
           <div className="flex flex-col md:flex-row gap-4">
+            {filteredBookings.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleSelectAll}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20 md:w-auto w-full"
+              >
+                {selectedBookings.size === filteredBookings.length ? (
+                  <>
+                    <Square className="h-4 w-4 mr-2" />
+                    {t.deselectAll}
+                  </>
+                ) : (
+                  <>
+                    <CheckSquare className="h-4 w-4 mr-2" />
+                    {t.selectAll}
+                  </>
+                )}
+              </Button>
+            )}
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -246,60 +406,85 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
         </Card>
 
         {filteredBookings.length === 0 ? (
-          <Card className="p-12 border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
-            <div className="text-center">
-              <Calendar className="h-16 w-16 text-gray-500 mx-auto mb-4" />
-              <p className="text-xl text-gray-400">{t.noBookings}</p>
-            </div>
+          <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
+            <EmptyState
+              icon={Search}
+              title={t.noBookings}
+              description="Try adjusting your search or filter criteria"
+              secondaryActionLabel="Clear Filters"
+              onSecondaryAction={() => {
+                setSearchTerm('');
+                setFilterStatus('all');
+                setDateRange({ from: '', to: '' });
+              }}
+            />
           </Card>
         ) : (
           <div className="grid gap-6">
             {filteredBookings.map((booking) => (
-              <Card key={booking.id} className="p-6 border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg hover:bg-white/10 transition-all">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
-                  <div className="flex items-center gap-3">
-                    <Calendar className="h-6 w-6 text-[#FFD700]" />
-                    <div>
-                      <p className="text-sm text-gray-400">{t.dateTime}</p>
-                      <p className="text-lg text-white font-medium">{booking.date} at {booking.time}</p>
+              <Card key={booking.id} className="p-6 border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg hover:bg-white/10 transition-all group">
+                <div className="flex gap-4">
+                  {/* Selection Checkbox */}
+                  <div className="flex items-start pt-1">
+                    <button
+                      onClick={() => toggleBookingSelection(booking.id)}
+                      className="p-1 rounded hover:bg-white/10 transition-colors"
+                    >
+                      {selectedBookings.has(booking.id) ? (
+                        <CheckSquare className="h-5 w-5 text-[#FFD700]" />
+                      ) : (
+                        <Square className="h-5 w-5 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="flex-1">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-4">
+                      <div className="flex items-center gap-3">
+                        <Calendar className="h-6 w-6 text-[#FFD700]" />
+                        <div>
+                          <p className="text-sm text-gray-400">{t.dateTime}</p>
+                          <p className="text-lg text-white font-medium">{booking.date} at {booking.time}</p>
+                        </div>
+                      </div>
+                      <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                        booking.status === 'pending' ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30' :
+                        booking.status === 'approved' ? 'bg-green-500/20 text-green-500 border border-green-500/30' :
+                        booking.status === 'denied' ? 'bg-red-500/20 text-red-500 border border-red-500/30' :
+                        'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                      }`}>
+                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                      </span>
                     </div>
-                  </div>
-                  <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                    booking.status === 'pending' ? 'bg-[#FFD700]/20 text-[#FFD700] border border-[#FFD700]/30' :
-                    booking.status === 'approved' ? 'bg-green-500/20 text-green-500 border border-green-500/30' :
-                    booking.status === 'denied' ? 'bg-red-500/20 text-red-500 border border-red-500/30' :
-                    'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                  }`}>
-                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                  </span>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-white/5 p-4 rounded-lg border border-white/10">
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-5 w-5 text-[#FFD700]" />
-                    <div>
-                      <p className="text-sm text-gray-400">{t.destination}</p>
-                      <p className="text-white font-medium">{booking.destination}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-white/5 p-4 rounded-lg border border-white/10">
+                      <div className="flex items-center gap-3">
+                        <MapPin className="h-5 w-5 text-[#FFD700]" />
+                        <div>
+                          <p className="text-sm text-gray-400">{t.destination}</p>
+                          <p className="text-white font-medium">{booking.destination}</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-gray-400">{t.passengers}</p>
+                        <p className="text-white font-medium">{booking.passengers} passengers</p>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-gray-400">{t.vehicle}</p>
+                        <p className="text-white font-medium">{booking.vehicleType}</p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div>
-                    <p className="text-sm text-gray-400">{t.passengers}</p>
-                    <p className="text-white font-medium">{booking.passengers} passengers</p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-400">{t.vehicle}</p>
-                    <p className="text-white font-medium">{booking.vehicleType}</p>
+                    {booking.status === 'pending' && (
+                      <div className="flex gap-3">
+                        <EditBookingDialog booking={booking} onUpdate={refetch} t={t} language={language} />
+                        <CancelBookingDialog bookingId={booking.id} onCancel={handleCancel} t={t} isCancelling={isCancelling} />
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                {booking.status === 'pending' && (
-                  <div className="flex gap-3">
-                    <EditBookingDialog booking={booking} onUpdate={refetch} t={t} language={language} />
-                    <CancelBookingDialog bookingId={booking.id} onCancel={handleCancel} t={t} />
-                  </div>
-                )}
               </Card>
             ))}
           </div>
@@ -451,9 +636,10 @@ interface CancelBookingDialogProps {
   bookingId: string;
   onCancel: (id: string) => void;
   t: typeof translations['en'];
+  isCancelling: boolean;
 }
 
-function CancelBookingDialog({ bookingId, onCancel, t }: CancelBookingDialogProps) {
+function CancelBookingDialog({ bookingId, onCancel, t, isCancelling }: CancelBookingDialogProps) {
   const handleConfirmCancel = () => {
     onCancel(bookingId);
   };
@@ -465,8 +651,17 @@ function CancelBookingDialog({ bookingId, onCancel, t }: CancelBookingDialogProp
           variant="destructive"
           className="flex-1 bg-red-600 hover:bg-red-700"
         >
-          <X className="h-4 w-4 mr-2" />
-          {t.cancel}
+          {isCancelling ? (
+            <>
+              <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              {t.cancelling}
+            </>
+          ) : (
+            <>
+              <X className="h-4 w-4 mr-2" />
+              {t.cancel}
+            </>
+          )}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="bg-black/95 backdrop-blur-xl border-white/10">
