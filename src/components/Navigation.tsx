@@ -3,8 +3,6 @@ import { Menu, LogOut, Globe } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { UserRole, Language } from '../App';
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import schoolLogo from 'figma:asset/4bd846bf67c44fcbc0a58285b6a6f879210a7b3c.png';
 
 interface NavigationProps {
   currentPage: string;
@@ -74,7 +72,7 @@ export function Navigation({ currentPage, setCurrentPage, userRole, userName, la
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-xl flex items-center justify-center shadow-lg shadow-[#FFD700]/20">
-              <ImageWithFallback src={schoolLogo} alt="ISD Logo" className="w-6 h-6 object-contain" />
+              <img src="/images/SchoolLogo.png" alt="ISD Logo" className="w-6 h-6 object-contain" />
             </div>
             <span className="text-xl font-semibold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent">ISD Car Reservation</span>
           </div>
@@ -134,7 +132,7 @@ export function Navigation({ currentPage, setCurrentPage, userRole, userName, la
                 <div className="flex flex-col h-full">
                   <div className="flex items-center gap-3 mb-8">
                     <div className="w-10 h-10 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-xl flex items-center justify-center">
-                      <ImageWithFallback src={schoolLogo} alt="ISD Logo" className="w-6 h-6 object-contain" />
+                      <img src="/images/SchoolLogo.png" alt="ISD Logo" className="w-6 h-6 object-contain" />
                     </div>
                     <span>ISD Car Reservation</span>
                   </div>
