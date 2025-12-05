@@ -14,7 +14,7 @@ import { bookingAPI } from '../../utils/api';
 import { useState } from 'react';
 import { exportBookingsToCSV } from '../../utils/export';
 import { EmptyState } from '../ui/empty-state';
-import { TableSkeleton } from '../ui/skeleton';
+import { BookingListSkeleton } from '../ui/loading-skeletons';
 
 interface BookingRequest {
   id: string;
@@ -198,11 +198,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
   };
 
   if (loading) {
-    return (
-      <div className="space-y-6">
-        <TableSkeleton rows={3} />
-      </div>
-    );
+    return <BookingListSkeleton count={5} />;
   }
 
   const pendingRequests = requests.filter(r => r.status === 'pending');

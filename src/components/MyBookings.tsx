@@ -15,7 +15,7 @@ import { toast } from 'sonner@2.0.3';
 import { DateRangePicker, DateRange } from './DateRangePicker';
 import { exportBookingsToCSV } from '../utils/export';
 import { EmptyState } from './ui/empty-state';
-import { TableSkeleton } from './ui/skeleton';
+import { BookingListSkeleton, StatsCardsSkeleton, Skeleton } from './ui/loading-skeletons';
 
 interface Booking {
   id: string;
@@ -194,10 +194,11 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
       <div className="min-h-screen py-8 px-4">
         <div className="container mx-auto">
           <div className="mb-8">
-            <div className="h-10 w-48 bg-white/10 rounded-lg animate-pulse mb-2"></div>
-            <div className="h-5 w-64 bg-white/5 rounded animate-pulse"></div>
+            <Skeleton className="h-10 w-48 mb-2" />
+            <Skeleton className="h-5 w-64" />
           </div>
-          <TableSkeleton rows={5} />
+          <StatsCardsSkeleton />
+          <BookingListSkeleton count={5} />
         </div>
       </div>
     );

@@ -7,7 +7,7 @@ import { Language } from '../App';
 import { useDriverTrips } from '../hooks/useBackend';
 import { driverAPI } from '../utils/api';
 import { EmptyState } from './ui/empty-state';
-import { CardSkeleton } from './ui/skeleton';
+import { BookingListSkeleton } from './ui/loading-skeletons';
 
 interface Trip {
   id: string;
@@ -102,14 +102,7 @@ export function DriverInterface({ language }: { language: Language }) {
     return (
       <div className="min-h-screen py-4 md:py-8 px-4">
         <div className="container mx-auto max-w-2xl">
-          <div className="mb-6">
-            <div className="h-10 w-48 bg-white/10 rounded-lg animate-pulse mb-2"></div>
-            <div className="h-5 w-64 bg-white/5 rounded animate-pulse"></div>
-          </div>
-          <div className="space-y-4">
-            <CardSkeleton />
-            <CardSkeleton />
-          </div>
+          <BookingListSkeleton count={3} />
         </div>
       </div>
     );
