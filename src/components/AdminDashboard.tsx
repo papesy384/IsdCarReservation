@@ -7,7 +7,6 @@ import { UsersTab } from './admin/UsersTab';
 import { ReportsTab } from './admin/ReportsTab';
 import { Language } from '../App';
 import { Button } from './ui/button';
-import { Globe } from 'lucide-react';
 
 interface AdminDashboardProps {
   language: Language;
