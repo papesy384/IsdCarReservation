@@ -1,0 +1,53 @@
+{
+  "welcome_message": "Welcome to the Transport Hub.",
+  "common": {
+    "login": "Login",
+    "logout": "Logout",
+    "signup": "Sign Up",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "newBooking": "New Booking",
+    "myBookings": "My Bookings",
+    "driverView": "Driver View"
+  },
+  "auth": {
+    "email": "Email Address",
+    "password": "Password",
+    "name": "Full Name",
+    "phone": "Phone Number",
+    "department": "Department",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?"
+  },
+  "booking": {
+    "title": "New Booking Request",
+    "date": "Date",
+    "time": "Departure Time",
+    "destination": "Destination",
+    "passengers": "Number of Passengers",
+    "vehicleType": "Vehicle Type",
+    "purpose": "Purpose",
+    "submit": "Submit Booking Request",
+    "success": "Booking request submitted successfully!",
+    "minAdvanceBooking": "Reservations must be made at least 24 hours in advance"
+  }
+}
+

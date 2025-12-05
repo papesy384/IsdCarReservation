@@ -1,0 +1,53 @@
+{
+  "welcome_message": "Bienvenue au Centre de Transport.",
+  "common": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "signup": "S'inscrire",
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "confirm": "Confirmer"
+  },
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "newBooking": "Nouvelle réservation",
+    "myBookings": "Mes réservations",
+    "driverView": "Vue conducteur"
+  },
+  "auth": {
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "name": "Nom complet",
+    "phone": "Numéro de téléphone",
+    "department": "Département",
+    "forgotPassword": "Mot de passe oublié?",
+    "rememberMe": "Se souvenir de moi",
+    "alreadyHaveAccount": "Vous avez déjà un compte?",
+    "dontHaveAccount": "Vous n'avez pas de compte?"
+  },
+  "booking": {
+    "title": "Nouvelle demande de réservation",
+    "date": "Date",
+    "time": "Heure de départ",
+    "destination": "Destination",
+    "passengers": "Nombre de passagers",
+    "vehicleType": "Type de véhicule",
+    "purpose": "Objectif",
+    "submit": "Soumettre la demande de réservation",
+    "success": "Demande de réservation soumise avec succès!",
+    "minAdvanceBooking": "Les réservations doivent être effectuées au moins 24 heures à l'avance"
+  }
+}
+

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Login } from './components/Login';
 import { Signup } from './components/Signup';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -25,12 +26,18 @@ interface User {
 }
 
 export default function App() {
+  const { i18n } = useTranslation();
   const [currentPage, setCurrentPage] = useState<'login' | 'signup' | 'dashboard' | 'booking' | 'driver' | 'my-bookings'>('login');
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguage] = useState<Language>(i18n.language as Language || 'en');
   const [isInitialized, setIsInitialized] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Sync i18n language with app language state
+  useEffect(() => {
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
 
   // Initialize database with seed data on first load
   useEffect(() => {
