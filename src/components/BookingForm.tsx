@@ -51,6 +51,7 @@ const translations = {
     submit: 'Submit Booking Request',
     success: 'Booking request submitted successfully!',
     pleaseSelect: 'Please select a vehicle type',
+    minAdvanceBooking: 'Reservations must be made at least 24 hours in advance',
   },
   fr: {
     title: 'Nouvelle demande de réservation',
@@ -76,6 +77,7 @@ const translations = {
     submit: 'Soumettre la demande de réservation',
     success: 'Demande de réservation soumise avec succès!',
     pleaseSelect: 'Veuillez sélectionner un type de véhicule',
+    minAdvanceBooking: 'Les réservations doivent être effectuées au moins 24 heures à l\'avance',
   },
 };
 
@@ -115,13 +117,23 @@ export function BookingForm({ user, language }: BookingFormProps) {
       return;
     }
 
-    // Validate date is not in the past
+    // Validate date and time are provided
+    if (!formData.date || !formData.time) {
+      toast.error(language === 'en' ? 'Please select both date and time' : 'Veuillez sélectionner la date et l\'heure');
+      return;
+    }
+
+    // Validate booking is at least 24 hours in advance
     const selectedDate = new Date(formData.date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const [hours, minutes] = formData.time.split(':').map(Number);
+    const departureDateTime = new Date(selectedDate);
+    departureDateTime.setHours(hours, minutes, 0, 0);
     
-    if (selectedDate < today) {
-      toast.error(language === 'en' ? 'Cannot book a trip for a past date' : 'Impossible de réserver un voyage pour une date passée');
+    const now = new Date();
+    const minBookingTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+    
+    if (departureDateTime < minBookingTime) {
+      toast.error(t.minAdvanceBooking);
       return;
     }
 
@@ -253,10 +265,18 @@ export function BookingForm({ user, language }: BookingFormProps) {
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={(() => {
+                    // Minimum date is tomorrow (to ensure 24 hours advance booking)
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    return tomorrow.toISOString().split('T')[0];
+                  })()}
                   required
                   className="bg-white/10 border-white/20 text-white focus:border-[#FFD700]"
                 />
+                <p className="text-xs text-gray-400 mt-1">
+                  {language === 'en' ? 'Minimum 24 hours advance booking required' : 'Réservation minimum 24 heures à l\'avance requise'}
+                </p>
               </div>
 
               <div>
