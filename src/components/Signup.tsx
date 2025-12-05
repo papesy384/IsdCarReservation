@@ -1,19 +1,14 @@
-import React, { useState } from 'react';
-import { Alert, AlertDescription } from './ui/alert';
-import { authAPI, supabase } from '../utils/api';
-import { AnimatedBackground } from './AnimatedBackground';
-<<<<<<< Updated upstream
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import schoolLogo from 'figma:asset/4bd846bf67c44fcbc0a58285b6a6f879210a7b3c.png';
+import { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Mail, Lock, User, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Language } from '../App';
-=======
->>>>>>> Stashed changes
+import { AlertCircle, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription } from './ui/alert';
+import { authAPI, supabase } from '../utils/api';
+import { AnimatedBackground } from './AnimatedBackground';
 
 interface SignupProps {
   onSignup: (accessToken: string) => void;
@@ -126,13 +121,8 @@ export function Signup({ onSignup, onSwitchToLogin, language }: SignupProps) {
       <div className="w-full max-w-md relative z-10">
         {/* Logo and Title */}
         <div className="text-center mb-8">
-<<<<<<< Updated upstream
-          <div className="w-20 h-20 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-[#FFD700]/20">
-            <ImageWithFallback src={schoolLogo} alt="ISD Logo" className="w-12 h-12 object-contain" />
-=======
           <div className="w-20 h-20 bg-black/50 backdrop-blur-sm border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl">
             <img src="/images/SchoolLogo.png" alt="ISD Logo" className="h-14 w-14 object-contain" />
->>>>>>> Stashed changes
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent">{t.title}</h1>
         </div>
