@@ -122,7 +122,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
       toast.success(t.approved);
       refetch();
     } else {
-      toast.error('Failed to approve booking');
+      toast.error('Échec de l\'approbation de la réservation');
     }
     setIsProcessing(false);
   };
@@ -140,7 +140,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
       setSelectedRequests(new Set());
       refetch();
     } catch (error) {
-      toast.error('Failed to approve some bookings');
+      toast.error('Échec de l\'approbation de certaines réservations');
     } finally {
       setIsProcessing(false);
     }
@@ -159,7 +159,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
       setSelectedRequests(new Set());
       refetch();
     } catch (error) {
-      toast.error('Failed to deny some bookings');
+      toast.error('Échec du refus de certaines réservations');
     } finally {
       setIsProcessing(false);
     }
@@ -192,7 +192,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
       toast.error(t.denied);
       refetch();
     } else {
-      toast.error('Failed to deny booking');
+      toast.error('Échec du refus de la réservation');
     }
     setIsProcessing(false);
   };

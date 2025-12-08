@@ -69,11 +69,11 @@ const translations = {
 
 const departments = [
   'Administration',
-  'Teaching',
+  'Enseignement',
   'Maintenance',
   'IT',
-  'Security',
-  'Transportation',
+  'Sécurité',
+  'Transport',
 ];
 
 export function Signup({ onSignup, onSwitchToLogin, language }: SignupProps) {

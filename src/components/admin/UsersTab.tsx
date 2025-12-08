@@ -93,7 +93,7 @@ export function UsersTab({ language }: { language: Language }) {
       toast.success(t.userAdded);
       refetch();
     } else {
-      toast.error('Failed to add user');
+      toast.error('Échec de l\'ajout de l\'utilisateur');
     }
   };
 
@@ -108,7 +108,7 @@ export function UsersTab({ language }: { language: Language }) {
         toast.success(t.userUpdated);
         refetch();
       } else {
-        toast.error('Failed to update user');
+        toast.error('Échec de la mise à jour de l\'utilisateur');
       }
     }
   };
@@ -121,7 +121,7 @@ export function UsersTab({ language }: { language: Language }) {
       toast.success(t.userDeleted);
       refetch();
     } else {
-      toast.error('Failed to delete user');
+      toast.error('Échec de la suppression de l\'utilisateur');
     }
   };
 

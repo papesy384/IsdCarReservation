@@ -99,7 +99,7 @@ export function VehiclesTab({ language }: { language: Language }) {
       toast.success(t.vehicleAdded);
       refetch();
     } else {
-      toast.error('Failed to add vehicle');
+      toast.error('Échec de l\'ajout du véhicule');
     }
   };
 
@@ -114,7 +114,7 @@ export function VehiclesTab({ language }: { language: Language }) {
         toast.success(t.vehicleUpdated);
         refetch();
       } else {
-        toast.error('Failed to update vehicle');
+        toast.error('Échec de la mise à jour du véhicule');
       }
     }
   };
@@ -127,7 +127,7 @@ export function VehiclesTab({ language }: { language: Language }) {
       toast.success(t.vehicleDeleted);
       refetch();
     } else {
-      toast.error('Failed to delete vehicle');
+      toast.error('Échec de la suppression du véhicule');
     }
   };
 

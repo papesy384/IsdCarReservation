@@ -78,7 +78,7 @@ export function DriverInterface({ language }: { language: Language }) {
       toast.success(t.tripStarted);
       refetch();
     } else {
-      toast.error('Failed to start trip');
+      toast.error('Échec du démarrage du voyage');
     }
   };
 
@@ -90,12 +90,12 @@ export function DriverInterface({ language }: { language: Language }) {
       toast.success(t.tripCompleted);
       refetch();
     } else {
-      toast.error('Failed to complete trip');
+      toast.error('Échec de la finalisation du voyage');
     }
   };
 
   const handleNavigate = (destination: string) => {
-    toast.info(`Opening navigation to ${destination}`);
+    toast.info(`Ouverture de la navigation vers ${destination}`);
   };
 
   if (loading) {

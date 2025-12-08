@@ -119,7 +119,7 @@ export function BookingForm({ user, language }: BookingFormProps) {
 
     // Validate date and time are provided
     if (!formData.date || !formData.time) {
-      toast.error(language === 'en' ? 'Please select both date and time' : 'Veuillez sélectionner la date et l\'heure');
+      toast.error('Veuillez sélectionner la date et l\'heure');
       return;
     }
 
@@ -175,7 +175,7 @@ export function BookingForm({ user, language }: BookingFormProps) {
       });
       setShowConfirmation(false);
     } else {
-      toast.error('Failed to create booking');
+      toast.error('Échec de la création de la réservation');
     }
   };
 
@@ -188,32 +188,32 @@ export function BookingForm({ user, language }: BookingFormProps) {
               <div className="mx-auto mb-6 h-20 w-20 rounded-full bg-green-500/20 flex items-center justify-center">
                 <CheckCircle className="h-12 w-12 text-green-500" />
               </div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-green-500 to-white bg-clip-text text-transparent mb-2">Booking Confirmation</h2>
-              <p className="text-gray-400 mb-6">Please review your booking details</p>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-green-500 to-white bg-clip-text text-transparent mb-2">Confirmation de réservation</h2>
+              <p className="text-gray-400 mb-6">Veuillez vérifier les détails de votre réservation</p>
               
               <div className="text-left space-y-4 mb-8 bg-white/5 p-6 rounded-lg border border-white/10">
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <span className="text-gray-400">Date:</span>
+                  <span className="text-gray-400">Date :</span>
                   <span className="text-white font-medium">{formData.date}</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <span className="text-gray-400">Time:</span>
+                  <span className="text-gray-400">Heure :</span>
                   <span className="text-white font-medium">{formData.time}</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <span className="text-gray-400">Destination:</span>
+                  <span className="text-gray-400">Destination :</span>
                   <span className="text-white font-medium">{formData.destination}</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <span className="text-gray-400">Passengers:</span>
+                  <span className="text-gray-400">Passagers :</span>
                   <span className="text-white font-medium">{formData.passengers}</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <span className="text-gray-400">Vehicle:</span>
+                  <span className="text-gray-400">Véhicule :</span>
                   <span className="text-white font-medium">{formData.vehicleType}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Purpose:</span>
+                  <span className="text-gray-400">Objectif :</span>
                   <span className="text-white font-medium">{formData.purpose === 'Other' ? formData.otherPurpose : formData.purpose}</span>
                 </div>
               </div>
@@ -224,13 +224,13 @@ export function BookingForm({ user, language }: BookingFormProps) {
                   variant="outline"
                   className="flex-1 border-white/20 bg-white/5 text-white hover:bg-white/10"
                 >
-                  Back to Edit
+                  Retour à la modification
                 </Button>
                 <Button
                   onClick={confirmSubmit}
                   className="flex-1 bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-black hover:from-[#FFD700]/90 hover:to-[#FFA500]/90 shadow-lg shadow-[#FFD700]/20"
                 >
-                  Confirm Booking
+                  Confirmer la réservation
                 </Button>
               </div>
             </div>
@@ -245,7 +245,7 @@ export function BookingForm({ user, language }: BookingFormProps) {
       <div className="container mx-auto max-w-3xl">
         <div className="mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent mb-2">{t.title}</h1>
-          <p className="text-gray-400">Fill out the form below to request a vehicle</p>
+          <p className="text-gray-400">Remplissez le formulaire ci-dessous pour demander un véhicule</p>
         </div>
 
         <Card className="p-8 border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl">
@@ -301,7 +301,7 @@ export function BookingForm({ user, language }: BookingFormProps) {
                 id="destination"
                 value={formData.destination}
                 onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-                placeholder="Enter destination address"
+                placeholder="Entrez l'adresse de destination"
                 required
                 className="bg-white/10 border-white/20 text-white placeholder:text-gray-500 focus:border-[#FFD700]"
               />
@@ -329,7 +329,7 @@ export function BookingForm({ user, language }: BookingFormProps) {
               </Select>
               {formData.vehicleType && (
                 <p className="text-sm text-gray-400 mt-2">
-                  Maximum capacity: {selectedCapacity} passengers
+                  Capacité maximale : {selectedCapacity} passagers
                 </p>
               )}
             </div>

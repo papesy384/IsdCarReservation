@@ -139,7 +139,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
       toast.success(t.cancelled_msg);
       refetch();
     } else {
-      toast.error('Failed to cancel booking');
+      toast.error('Échec de l\'annulation de la réservation');
     }
     setIsCancelling(false);
   };
@@ -157,7 +157,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
       setSelectedBookings(new Set());
       refetch();
     } catch (error) {
-      toast.error('Failed to cancel some bookings');
+      toast.error('Échec de l\'annulation de certaines réservations');
     } finally {
       setIsCancelling(false);
     }
@@ -241,7 +241,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
         <div className="container mx-auto">
           <div className="mb-8">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent mb-2">{t.title}</h1>
-            <p className="text-gray-400">View and manage your booking requests</p>
+            <p className="text-gray-400">Consultez et gérez vos demandes de réservation</p>
           </div>
           <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
             <EmptyState
@@ -249,7 +249,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
               title={t.emptyTitle}
               description={t.emptyDescription}
               actionLabel={t.emptyAction}
-              onAction={() => toast.info('Navigate to booking form')}
+              onAction={() => toast.info('Aller au formulaire de réservation')}
             />
           </Card>
         </div>
@@ -528,7 +528,7 @@ function EditBookingDialog({ booking, onUpdate, t, language }: EditBookingDialog
       onUpdate();
       setIsOpen(false);
     } else {
-      toast.error('Failed to update booking');
+      toast.error('Échec de la mise à jour de la réservation');
     }
   };
 
