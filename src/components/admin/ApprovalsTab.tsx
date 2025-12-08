@@ -66,6 +66,10 @@ const translations = {
     bulkDeny: 'Deny Selected',
     approving: 'Approving...',
     denying: 'Denying...',
+    refreshBookings: 'Refresh bookings',
+    noApprovalsMatch: 'No approvals match your filters',
+    tryAdjusting: 'Try adjusting your search or filter criteria',
+    clearFilters: 'Clear Filters',
   },
   fr: {
     noPending: 'Aucune approbation en attente',
@@ -102,6 +106,10 @@ const translations = {
     bulkDeny: 'Refuser la sélection',
     approving: 'Approbation...',
     denying: 'Refus...',
+    refreshBookings: 'Actualiser les réservations',
+    noApprovalsMatch: 'Aucune approbation ne correspond à vos filtres',
+    tryAdjusting: 'Essayez d\'ajuster vos critères de recherche ou de filtre',
+    clearFilters: 'Effacer les filtres',
   },
 };
 
@@ -350,7 +358,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
           onClick={refetch}
           variant="outline"
           className="h-12 px-6 bg-white/10 border-white/20 text-white hover:bg-white/20"
-          title="Refresh bookings"
+          title={t.refreshBookings}
         >
           <RefreshCw className="h-5 w-5" />
         </Button>
@@ -368,9 +376,9 @@ export function ApprovalsTab({ language }: { language: Language }) {
         <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
           <EmptyState
             icon={Search}
-            title="No approvals match your filters"
-            description="Try adjusting your search or filter criteria"
-            secondaryActionLabel="Clear Filters"
+            title={t.noApprovalsMatch}
+            description={t.tryAdjusting}
+            secondaryActionLabel={t.clearFilters}
             onSecondaryAction={() => {
               setSearchQuery('');
               setDepartmentFilter('all');
