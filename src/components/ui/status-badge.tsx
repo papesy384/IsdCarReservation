@@ -1,6 +1,7 @@
 import { CheckCircle, Clock, XCircle, Ban } from 'lucide-react';
 import { Badge } from './badge';
 import { cn } from './utils';
+import { useTranslation } from 'react-i18next';
 
 type BookingStatus = 'pending' | 'approved' | 'denied' | 'cancelled';
 type TripStatus = 'upcoming' | 'in-progress' | 'completed';
@@ -8,7 +9,7 @@ type TripStatus = 'upcoming' | 'in-progress' | 'completed';
 interface StatusBadgeProps {
   status: BookingStatus | TripStatus;
   className?: string;
-  language?: 'en' | 'fr';
+  language?: 'en' | 'fr'; // Keep for backward compatibility, but will use i18n if available
 }
 
 const statusLabels = {
@@ -63,10 +64,13 @@ const bookingStatusConfig = {
   },
 };
 
-export function StatusBadge({ status, className, language = 'en' }: StatusBadgeProps) {
+export function StatusBadge({ status, className, language }: StatusBadgeProps) {
+  const { i18n } = useTranslation();
   const config = bookingStatusConfig[status];
   const Icon = config.icon;
-  const label = statusLabels[language][status];
+  // Use i18n language if available, otherwise fall back to prop or 'en'
+  const currentLanguage = (language || i18n.language || 'en') as 'en' | 'fr';
+  const label = statusLabels[currentLanguage]?.[status] || statusLabels['en'][status];
 
   return (
     <Badge className={cn(config.className, 'flex items-center gap-1.5 px-3 py-1', className)}>
