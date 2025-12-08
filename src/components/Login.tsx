@@ -36,6 +36,16 @@ const translations = {
     employee: 'Employee',
     driver: 'Driver',
     forgotPassword: 'Forgot password?',
+    feature1Title: 'Smart Booking System',
+    feature1Desc: 'Streamlined vehicle reservation process',
+    feature2Title: 'Real-time Updates',
+    feature2Desc: 'Instant approval notifications and status tracking',
+    feature3Title: 'Comprehensive Analytics',
+    feature3Desc: 'Advanced reporting and insights dashboard',
+    stat1Label: 'Available',
+    stat2Label: 'Secure',
+    stat3Label: 'Approval',
+    footer: '© 2024 ISD Car Reservation. All rights reserved.',
   },
   fr: {
     title: 'Réservation de Voitures ISD',
@@ -56,6 +66,16 @@ const translations = {
     employee: 'Employé',
     driver: 'Chauffeur',
     forgotPassword: 'Mot de passe oublié?',
+    feature1Title: 'Système de Réservation Intelligent',
+    feature1Desc: 'Processus de réservation de véhicules rationalisé',
+    feature2Title: 'Mises à Jour en Temps Réel',
+    feature2Desc: 'Notifications d\'approbation instantanées et suivi du statut',
+    feature3Title: 'Analyses Complètes',
+    feature3Desc: 'Tableau de bord de rapports et d\'analyses avancés',
+    stat1Label: 'Disponible',
+    stat2Label: 'Sécurisé',
+    stat3Label: 'Approbation',
+    footer: '© 2024 Réservation de Voitures ISD. Tous droits réservés.',
   },
 };
 
@@ -141,8 +161,8 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
                 <CheckCircle2 className="w-5 h-5 text-[#FFD700]" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">Smart Booking System</h3>
-                <p className="text-gray-400 text-sm">Streamlined vehicle reservation process</p>
+                <h3 className="font-semibold text-white">{t.feature1Title}</h3>
+                <p className="text-gray-400 text-sm">{t.feature1Desc}</p>
               </div>
             </div>
 
@@ -151,8 +171,8 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
                 <CheckCircle2 className="w-5 h-5 text-[#FFD700]" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">Real-time Updates</h3>
-                <p className="text-gray-400 text-sm">Instant approval notifications and status tracking</p>
+                <h3 className="font-semibold text-white">{t.feature2Title}</h3>
+                <p className="text-gray-400 text-sm">{t.feature2Desc}</p>
               </div>
             </div>
 
@@ -161,8 +181,8 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
                 <CheckCircle2 className="w-5 h-5 text-[#FFD700]" />
               </div>
               <div>
-                <h3 className="font-semibold text-white">Comprehensive Analytics</h3>
-                <p className="text-gray-400 text-sm">Advanced reporting and insights dashboard</p>
+                <h3 className="font-semibold text-white">{t.feature3Title}</h3>
+                <p className="text-gray-400 text-sm">{t.feature3Desc}</p>
               </div>
             </div>
           </div>
@@ -171,15 +191,15 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
           <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/10">
             <div>
               <div className="text-3xl font-bold text-[#FFD700]">24/7</div>
-              <div className="text-sm text-gray-400">Available</div>
+              <div className="text-sm text-gray-400">{t.stat1Label}</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-[#FFD700]">100%</div>
-              <div className="text-sm text-gray-400">Secure</div>
+              <div className="text-sm text-gray-400">{t.stat2Label}</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-[#FFD700]">Fast</div>
-              <div className="text-sm text-gray-400">Approval</div>
+              <div className="text-3xl font-bold text-[#FFD700]">Rapide</div>
+              <div className="text-sm text-gray-400">{t.stat3Label}</div>
             </div>
           </div>
         </div>
@@ -326,7 +346,7 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
 
           {/* Footer */}
           <p className="text-center text-xs text-gray-500 mt-6">
-            © 2024 ISD Car Reservation. All rights reserved.
+            {t.footer}
           </p>
         </div>
       </div>
