@@ -393,7 +393,11 @@ export function ReportsTab({ language }: { language: Language }) {
               <SelectTrigger className="w-48 bg-white/10 border-white/20 text-white focus:border-[#FFD700]">
                 <Filter className="h-4 w-4 mr-2 text-[#FFD700]" />
                 <SelectValue>
-                  {filterStatus === 'all' ? t.allStatuses : filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
+                  {filterStatus === 'all' ? t.allStatuses : 
+                   filterStatus === 'pending' ? t.pendingBookings :
+                   filterStatus === 'approved' ? t.approvedBookings :
+                   filterStatus === 'denied' ? t.deniedBookings :
+                   t.cancelledBookings}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-black/95 backdrop-blur-xl border-white/10">

@@ -381,7 +381,11 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
               <SelectTrigger className="w-full md:w-48 bg-white/10 border-white/20 text-white focus:border-[#FFD700]">
                 <Filter className="h-4 w-4 mr-2 text-[#FFD700]" />
                 <SelectValue>
-                  {filterStatus === 'all' ? t.allStatuses : filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
+                  {filterStatus === 'all' ? t.allStatuses : 
+                   filterStatus === 'pending' ? t.pending :
+                   filterStatus === 'approved' ? t.approved :
+                   filterStatus === 'denied' ? t.denied :
+                   t.cancelled}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-black/95 backdrop-blur-xl border-white/10">
@@ -473,7 +477,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
 
                       <div>
                         <p className="text-sm text-gray-400">{t.passengers}</p>
-                        <p className="text-white font-medium">{booking.passengers} passengers</p>
+                        <p className="text-white font-medium">{booking.passengers} {language === 'en' ? 'passengers' : 'passagers'}</p>
                       </div>
 
                       <div>
