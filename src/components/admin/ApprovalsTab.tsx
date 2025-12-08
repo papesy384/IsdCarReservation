@@ -404,7 +404,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
                       </h3>
                       <p className="text-gray-400">{t.department}: {request.department}</p>
                     </div>
-                    <StatusBadge status={request.status} />
+                    <StatusBadge status={request.status} language={language} />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">

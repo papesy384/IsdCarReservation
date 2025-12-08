@@ -46,6 +46,9 @@ const translations = {
     vehicleAdded: 'Vehicle added successfully',
     vehicleUpdated: 'Vehicle updated successfully',
     vehicleDeleted: 'Vehicle deleted successfully',
+    edit: 'Edit',
+    deleteConfirm: 'Are you sure you want to delete',
+    deleteConfirmDesc: 'This action cannot be undone.',
   },
   fr: {
     addVehicle: 'Ajouter un véhicule',
@@ -69,6 +72,9 @@ const translations = {
     vehicleAdded: 'Véhicule ajouté avec succès',
     vehicleUpdated: 'Véhicule mis à jour avec succès',
     vehicleDeleted: 'Véhicule supprimé avec succès',
+    edit: 'Modifier',
+    deleteConfirm: 'Êtes-vous sûr de vouloir supprimer',
+    deleteConfirmDesc: 'Cette action ne peut pas être annulée.',
   },
 };
 
@@ -245,7 +251,7 @@ export function VehiclesTab({ language }: { language: Language }) {
                 <DialogTrigger asChild>
                   <Button variant="outline" className="flex-1 border border-white/20 bg-white/5 text-white hover:bg-white/10">
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                    {t.edit}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="bg-black/95 backdrop-blur-xl border-white/10 text-white" aria-describedby={undefined}>
@@ -265,7 +271,7 @@ export function VehiclesTab({ language }: { language: Language }) {
                 className="flex-1 bg-red-600/80 hover:bg-red-700 border border-red-500/30"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete
+                {t.delete}
               </Button>
             </div>
           </Card>
@@ -277,7 +283,7 @@ export function VehiclesTab({ language }: { language: Language }) {
         onOpenChange={setDeleteConfirmOpen}
         onConfirm={() => vehicleToDelete && handleDelete(vehicleToDelete.id)}
         title={t.deleteVehicle}
-        description={`Are you sure you want to delete "${vehicleToDelete?.name}"? This action cannot be undone.`}
+        description={`${t.deleteConfirm} "${vehicleToDelete?.name}"? ${t.deleteConfirmDesc}`}
         confirmText={t.delete}
         cancelText={t.cancel}
         variant="destructive"

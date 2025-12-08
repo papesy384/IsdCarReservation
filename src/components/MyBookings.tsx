@@ -455,7 +455,10 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
                         booking.status === 'denied' ? 'bg-red-500/20 text-red-500 border border-red-500/30' :
                         'bg-gray-500/20 text-gray-400 border border-gray-500/30'
                       }`}>
-                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                        {booking.status === 'pending' ? t.pending :
+                         booking.status === 'approved' ? t.approved :
+                         booking.status === 'denied' ? t.denied :
+                         t.cancelled}
                       </span>
                     </div>
 

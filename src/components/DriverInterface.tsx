@@ -42,6 +42,7 @@ const translations = {
     noTrips: 'No trips scheduled',
     emptyTitle: 'No trips scheduled today',
     emptyDescription: 'When trips are assigned to you, they will appear here. Check back later or contact dispatch.',
+    mapView: 'Map View',
   },
   fr: {
     title: 'Tableau de bord du conducteur',
@@ -63,6 +64,7 @@ const translations = {
     noTrips: 'Aucun voyage prévu',
     emptyTitle: 'Aucun voyage prévu aujourd\'hui',
     emptyDescription: 'Lorsque des voyages vous sont attribués, ils apparaîtront ici. Revenez plus tard ou contactez la répartition.',
+    mapView: 'Vue de la carte',
   },
 };
 
@@ -171,7 +173,7 @@ export function DriverInterface({ language }: { language: Language }) {
         <div className="flex items-center justify-center text-gray-400 relative z-10">
           <MapPin className="h-12 w-12" />
         </div>
-        <p className="text-center text-gray-400 mt-2 text-sm relative z-10">Map View</p>
+        <p className="text-center text-gray-400 mt-2 text-sm relative z-10">{t.mapView}</p>
       </div>
 
       <div className="space-y-3 mb-4">

@@ -42,6 +42,13 @@ const translations = {
     searchPlaceholder: 'Search users...',
     filterByRole: 'Filter by role',
     allRoles: 'All Roles',
+    edit: 'Edit',
+    delete: 'Delete',
+    deleteUser: 'Delete User',
+    deleteUserConfirm: 'Are you sure you want to delete',
+    deleteUserConfirmDesc: 'This action cannot be undone.',
+    exportCSV: 'Export CSV',
+    cancel: 'Cancel',
   },
   fr: {
     addUser: 'Ajouter un utilisateur',
@@ -61,6 +68,13 @@ const translations = {
     searchPlaceholder: 'Rechercher des utilisateurs...',
     filterByRole: 'Filtrer par rôle',
     allRoles: 'Tous les rôles',
+    edit: 'Modifier',
+    delete: 'Supprimer',
+    deleteUser: 'Supprimer l\'utilisateur',
+    deleteUserConfirm: 'Êtes-vous sûr de vouloir supprimer',
+    deleteUserConfirmDesc: 'Cette action ne peut pas être annulée.',
+    exportCSV: 'Exporter CSV',
+    cancel: 'Annuler',
   },
 };
 
@@ -251,7 +265,7 @@ export function UsersTab({ language }: { language: Language }) {
           onClick={() => exportUsersToCSV(users)}
         >
           <Download className="h-5 w-5 mr-2" />
-          Export CSV
+          {t.exportCSV}
         </Button>
       </div>
 
@@ -287,7 +301,7 @@ export function UsersTab({ language }: { language: Language }) {
                 <DialogTrigger asChild>
                   <Button variant="outline" className="flex-1 border border-white/20 bg-white/5 text-white hover:bg-white/10">
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                    {t.edit}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="bg-black/95 backdrop-blur-xl border-white/10 text-white" aria-describedby={undefined}>
@@ -307,7 +321,7 @@ export function UsersTab({ language }: { language: Language }) {
                 className="flex-1 bg-red-600/80 hover:bg-red-700 border border-red-500/30"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                Delete
+                {t.delete}
               </Button>
             </div>
           </Card>
@@ -318,10 +332,10 @@ export function UsersTab({ language }: { language: Language }) {
         open={deleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
         onConfirm={() => userToDelete && handleDelete(userToDelete.id)}
-        title="Delete User"
-        description={`Are you sure you want to delete "${userToDelete?.name}"? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t.deleteUser}
+        description={`${t.deleteUserConfirm} "${userToDelete?.name}"? ${t.deleteUserConfirmDesc}`}
+        confirmText={t.delete}
+        cancelText={t.cancel}
         variant="destructive"
       />
     </div>
