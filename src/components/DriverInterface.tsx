@@ -7,7 +7,7 @@ import { Language } from '../App';
 import { useDriverTrips } from '../hooks/useBackend';
 import { driverAPI } from '../utils/api';
 import { EmptyState } from './ui/empty-state';
-import { BookingListSkeleton } from './ui/loading-skeletons';
+import { CardSkeleton } from './ui/skeleton';
 
 interface Trip {
   id: string;
@@ -24,6 +24,7 @@ interface Trip {
 const translations = {
   en: {
     title: 'Driver Dashboard',
+    subtitle: 'Manage your daily trips and deliveries',
     todayTrips: 'Today\'s Trips',
     upcoming: 'Upcoming',
     inProgress: 'In Progress',
@@ -42,10 +43,13 @@ const translations = {
     noTrips: 'No trips scheduled',
     emptyTitle: 'No trips scheduled today',
     emptyDescription: 'When trips are assigned to you, they will appear here. Check back later or contact dispatch.',
-    mapView: 'Map View',
+    failedToStart: 'Failed to start trip',
+    failedToComplete: 'Failed to complete trip',
+    openingNavigation: 'Opening navigation to',
   },
   fr: {
     title: 'Tableau de bord du conducteur',
+    subtitle: 'Gérez vos trajets et livraisons quotidiennes',
     todayTrips: 'Voyages d\'aujourd\'hui',
     upcoming: 'À venir',
     inProgress: 'En cours',
@@ -64,7 +68,9 @@ const translations = {
     noTrips: 'Aucun voyage prévu',
     emptyTitle: 'Aucun voyage prévu aujourd\'hui',
     emptyDescription: 'Lorsque des voyages vous sont attribués, ils apparaîtront ici. Revenez plus tard ou contactez la répartition.',
-    mapView: 'Vue de la carte',
+    failedToStart: 'Échec du démarrage du voyage',
+    failedToComplete: 'Échec de la fin du voyage',
+    openingNavigation: 'Ouverture de la navigation vers',
   },
 };
 
@@ -80,7 +86,7 @@ export function DriverInterface({ language }: { language: Language }) {
       toast.success(t.tripStarted);
       refetch();
     } else {
-      toast.error('Échec du démarrage du voyage');
+      toast.error(t.failedToStart);
     }
   };
 
@@ -92,19 +98,26 @@ export function DriverInterface({ language }: { language: Language }) {
       toast.success(t.tripCompleted);
       refetch();
     } else {
-      toast.error('Échec de la finalisation du voyage');
+      toast.error(t.failedToComplete);
     }
   };
 
   const handleNavigate = (destination: string) => {
-    toast.info(`Ouverture de la navigation vers ${destination}`);
+    toast.info(`${t.openingNavigation} ${destination}`);
   };
 
   if (loading) {
     return (
       <div className="min-h-screen py-4 md:py-8 px-4">
         <div className="container mx-auto max-w-2xl">
-          <BookingListSkeleton count={3} />
+          <div className="mb-6">
+            <div className="h-10 w-48 bg-white/10 rounded-lg animate-pulse mb-2"></div>
+            <div className="h-5 w-64 bg-white/5 rounded animate-pulse"></div>
+          </div>
+          <div className="space-y-4">
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
         </div>
       </div>
     );
@@ -134,7 +147,7 @@ export function DriverInterface({ language }: { language: Language }) {
         <div className="container mx-auto max-w-2xl">
           <div className="mb-6">
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent mb-2">{t.title}</h1>
-            <p className="text-gray-400">Manage your daily trips and deliveries</p>
+            <p className="text-gray-400">{t.subtitle}</p>
           </div>
           <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
             <EmptyState
@@ -173,7 +186,7 @@ export function DriverInterface({ language }: { language: Language }) {
         <div className="flex items-center justify-center text-gray-400 relative z-10">
           <MapPin className="h-12 w-12" />
         </div>
-        <p className="text-center text-gray-400 mt-2 text-sm relative z-10">{t.mapView}</p>
+        <p className="text-center text-gray-400 mt-2 text-sm relative z-10">Map View</p>
       </div>
 
       <div className="space-y-3 mb-4">
@@ -245,7 +258,7 @@ export function DriverInterface({ language }: { language: Language }) {
       <div className="container mx-auto max-w-2xl">
         <div className="mb-6">
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent mb-2">{t.title}</h1>
-          <p className="text-gray-400">Manage your daily trips and deliveries</p>
+          <p className="text-gray-400">{t.subtitle}</p>
         </div>
 
         {/* In Progress Trips - Highest Priority */}

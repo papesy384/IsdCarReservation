@@ -1,63 +1,42 @@
-import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { ApprovalsTab } from './admin/ApprovalsTab';
 import { VehiclesTab } from './admin/VehiclesTab';
 import { UsersTab } from './admin/UsersTab';
 import { ReportsTab } from './admin/ReportsTab';
 import { Language } from '../App';
-import { Button } from './ui/button';
 
 interface AdminDashboardProps {
   language: Language;
 }
 
-export function AdminDashboard({ language }: AdminDashboardProps) {
-  const { t, i18n } = useTranslation();
-  const [activeTab, setActiveTab] = useState('approvals');
+const translations = {
+  en: {
+    title: 'Admin Dashboard',
+    approvals: 'Pending Approvals',
+    vehicles: 'Vehicle Management',
+    users: 'User Management',
+    reports: 'Reports',
+  },
+  fr: {
+    title: 'Tableau de bord administrateur',
+    approvals: 'Approbations en attente',
+    vehicles: 'Gestion des véhicules',
+    users: 'Gestion des utilisateurs',
+    reports: 'Rapports',
+  },
+};
 
-  // Sync i18n language with prop
-  useEffect(() => {
-    if (i18n.language !== language) {
-      i18n.changeLanguage(language);
-    }
-  }, [language, i18n]);
+export function AdminDashboard({ language }: AdminDashboardProps) {
+  const t = translations[language];
+  const [activeTab, setActiveTab] = useState('approvals');
 
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent mb-2">
-                {t('admin.admin_dashboard_title')}
-              </h1>
-              <p className="text-gray-400">{t('admin.dashboard_subtitle')}</p>
-            </div>
-            {/* Language Switcher */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => i18n.changeLanguage('en')}
-                className={`border-white/20 bg-white/5 text-white hover:bg-white/10 ${
-                  i18n.language === 'en' ? 'bg-[#FFD700]/20 border-[#FFD700]' : ''
-                }`}
-              >
-                EN
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => i18n.changeLanguage('fr')}
-                className={`border-white/20 bg-white/5 text-white hover:bg-white/10 ${
-                  i18n.language === 'fr' ? 'bg-[#FFD700]/20 border-[#FFD700]' : ''
-                }`}
-              >
-                FR
-              </Button>
-            </div>
-          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent mb-2">{t.title}</h1>
+          <p className="text-gray-400">Manage your fleet, users, and bookings</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -66,25 +45,25 @@ export function AdminDashboard({ language }: AdminDashboardProps) {
               value="approvals"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FFD700] data-[state=active]:to-[#FFA500] data-[state=active]:text-black text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#FFD700]/20"
             >
-              {t('admin.pendingApprovals')}
+              {t.approvals}
             </TabsTrigger>
             <TabsTrigger 
               value="vehicles"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FFD700] data-[state=active]:to-[#FFA500] data-[state=active]:text-black text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#FFD700]/20"
             >
-              {t('admin.vehicleManagement')}
+              {t.vehicles}
             </TabsTrigger>
             <TabsTrigger 
               value="users"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FFD700] data-[state=active]:to-[#FFA500] data-[state=active]:text-black text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#FFD700]/20"
             >
-              {t('admin.userManagement')}
+              {t.users}
             </TabsTrigger>
             <TabsTrigger 
               value="reports"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#FFD700] data-[state=active]:to-[#FFA500] data-[state=active]:text-black text-white data-[state=active]:shadow-lg data-[state=active]:shadow-[#FFD700]/20"
             >
-              {t('admin.reports')}
+              {t.reports}
             </TabsTrigger>
           </TabsList>
 

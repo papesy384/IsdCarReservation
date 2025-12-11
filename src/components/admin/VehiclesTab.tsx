@@ -12,7 +12,6 @@ import { useVehicles } from '../../hooks/useBackend';
 import { vehicleAPI } from '../../utils/api';
 import { ConfirmDialog } from '../ConfirmDialog';
 import { exportVehiclesToCSV } from '../../utils/export';
-import { BookingListSkeleton } from '../ui/loading-skeletons';
 
 interface Vehicle {
   id: string;
@@ -27,7 +26,9 @@ const translations = {
   en: {
     addVehicle: 'Add Vehicle',
     editVehicle: 'Edit Vehicle',
+    edit: 'Edit',
     deleteVehicle: 'Delete Vehicle',
+    delete: 'Delete',
     vehicleName: 'Vehicle Name',
     vehicleType: 'Vehicle Type',
     capacity: 'Capacity',
@@ -35,7 +36,6 @@ const translations = {
     status: 'Status',
     save: 'Save',
     cancel: 'Cancel',
-    delete: 'Delete',
     available: 'Available',
     inUse: 'In Use',
     maintenance: 'Maintenance',
@@ -46,14 +46,18 @@ const translations = {
     vehicleAdded: 'Vehicle added successfully',
     vehicleUpdated: 'Vehicle updated successfully',
     vehicleDeleted: 'Vehicle deleted successfully',
-    edit: 'Edit',
-    deleteConfirm: 'Are you sure you want to delete',
-    deleteConfirmDesc: 'This action cannot be undone.',
+    failedToAdd: 'Failed to add vehicle',
+    failedToUpdate: 'Failed to update vehicle',
+    failedToDelete: 'Failed to delete vehicle',
+    deleteConfirmDescription: 'Are you sure you want to delete',
+    deleteConfirmSuffix: 'This action cannot be undone.',
   },
   fr: {
     addVehicle: 'Ajouter un véhicule',
     editVehicle: 'Modifier le véhicule',
+    edit: 'Modifier',
     deleteVehicle: 'Supprimer le véhicule',
+    delete: 'Supprimer',
     vehicleName: 'Nom du véhicule',
     vehicleType: 'Type de véhicule',
     capacity: 'Capacité',
@@ -61,7 +65,6 @@ const translations = {
     status: 'Statut',
     save: 'Enregistrer',
     cancel: 'Annuler',
-    delete: 'Supprimer',
     available: 'Disponible',
     inUse: 'En cours d\'utilisation',
     maintenance: 'Maintenance',
@@ -72,9 +75,11 @@ const translations = {
     vehicleAdded: 'Véhicule ajouté avec succès',
     vehicleUpdated: 'Véhicule mis à jour avec succès',
     vehicleDeleted: 'Véhicule supprimé avec succès',
-    edit: 'Modifier',
-    deleteConfirm: 'Êtes-vous sûr de vouloir supprimer',
-    deleteConfirmDesc: 'Cette action ne peut pas être annulée.',
+    failedToAdd: 'Échec de l\'ajout du véhicule',
+    failedToUpdate: 'Échec de la mise à jour du véhicule',
+    failedToDelete: 'Échec de la suppression du véhicule',
+    deleteConfirmDescription: 'Êtes-vous sûr de vouloir supprimer',
+    deleteConfirmSuffix: 'Cette action ne peut pas être annulée.',
   },
 };
 
@@ -105,7 +110,7 @@ export function VehiclesTab({ language }: { language: Language }) {
       toast.success(t.vehicleAdded);
       refetch();
     } else {
-      toast.error('Échec de l\'ajout du véhicule');
+      toast.error(t.failedToAdd);
     }
   };
 
@@ -120,7 +125,7 @@ export function VehiclesTab({ language }: { language: Language }) {
         toast.success(t.vehicleUpdated);
         refetch();
       } else {
-        toast.error('Échec de la mise à jour du véhicule');
+        toast.error(t.failedToUpdate);
       }
     }
   };
@@ -133,7 +138,7 @@ export function VehiclesTab({ language }: { language: Language }) {
       toast.success(t.vehicleDeleted);
       refetch();
     } else {
-      toast.error('Échec de la suppression du véhicule');
+      toast.error(t.failedToDelete);
     }
   };
 
@@ -194,7 +199,12 @@ export function VehiclesTab({ language }: { language: Language }) {
   );
 
   if (loading) {
-    return <BookingListSkeleton count={5} />;
+    return (
+      <div className="text-center py-12">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#FFD700] border-r-transparent"></div>
+        <p className="mt-4 text-gray-400">Loading vehicles...</p>
+      </div>
+    );
   }
 
   return (
@@ -283,7 +293,7 @@ export function VehiclesTab({ language }: { language: Language }) {
         onOpenChange={setDeleteConfirmOpen}
         onConfirm={() => vehicleToDelete && handleDelete(vehicleToDelete.id)}
         title={t.deleteVehicle}
-        description={`${t.deleteConfirm} "${vehicleToDelete?.name}"? ${t.deleteConfirmDesc}`}
+        description={`${t.deleteConfirmDescription} "${vehicleToDelete?.name}"? ${t.deleteConfirmSuffix}`}
         confirmText={t.delete}
         cancelText={t.cancel}
         variant="destructive"

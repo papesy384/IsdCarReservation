@@ -7,12 +7,11 @@ import { Language } from '../../App';
 import { useState, useEffect } from 'react';
 import { bookingAPI } from '../../utils/api';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { StatsCardsSkeleton } from '../ui/loading-skeletons';
-import { Skeleton } from '../ui/skeleton';
 
 const translations = {
   en: {
     title: 'Reports & Analytics',
+    subtitle: 'Track bookings and analyze trends',
     overview: 'Overview',
     totalBookings: 'Total Bookings',
     pendingBookings: 'Pending',
@@ -41,6 +40,7 @@ const translations = {
   },
   fr: {
     title: 'Rapports et analyses',
+    subtitle: 'Suivez les réservations et analysez les tendances',
     overview: 'Aperçu',
     totalBookings: 'Réservations totales',
     pendingBookings: 'En attente',
@@ -97,17 +97,10 @@ export function ReportsTab({ language }: { language: Language }) {
 
   if (loading) {
     return (
-      <div className="space-y-8">
-        <StatsCardsSkeleton />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="p-6">
-            <Skeleton className="h-6 w-32 mb-4" />
-            <Skeleton className="h-64 w-full" />
-          </Card>
-          <Card className="p-6">
-            <Skeleton className="h-6 w-32 mb-4" />
-            <Skeleton className="h-64 w-full" />
-          </Card>
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#FFD700] border-r-transparent"></div>
+          <p className="mt-4 text-gray-400">{t.loading}</p>
         </div>
       </div>
     );
@@ -190,7 +183,7 @@ export function ReportsTab({ language }: { language: Language }) {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent">{t.title}</h2>
-          <p className="text-gray-400 mt-1">Track bookings and analyze trends</p>
+          <p className="text-gray-400 mt-1">{t.subtitle}</p>
         </div>
         <Button 
           onClick={downloadCSVReport}
@@ -393,11 +386,7 @@ export function ReportsTab({ language }: { language: Language }) {
               <SelectTrigger className="w-48 bg-white/10 border-white/20 text-white focus:border-[#FFD700]">
                 <Filter className="h-4 w-4 mr-2 text-[#FFD700]" />
                 <SelectValue>
-                  {filterStatus === 'all' ? t.allStatuses : 
-                   filterStatus === 'pending' ? t.pendingBookings :
-                   filterStatus === 'approved' ? t.approvedBookings :
-                   filterStatus === 'denied' ? t.deniedBookings :
-                   t.cancelledBookings}
+                  {filterStatus === 'all' ? t.allStatuses : filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-black/95 backdrop-blur-xl border-white/10">
@@ -452,10 +441,7 @@ export function ReportsTab({ language }: { language: Language }) {
                         booking.status === 'cancelled' ? 'bg-gray-500/20 text-gray-400 border border-gray-500/30' :
                         'bg-gray-500/20 text-gray-400 border border-gray-500/30'
                       }`}>
-                        {booking.status === 'pending' ? t.pendingBookings :
-                         booking.status === 'approved' ? t.approvedBookings :
-                         booking.status === 'denied' ? t.deniedBookings :
-                         t.cancelledBookings}
+                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                       </span>
                     </td>
                   </tr>

@@ -550,6 +550,115 @@ app.get('/make-server-3f59598d/health', (c) => {
 
 // ==================== INITIALIZATION ====================
 
+// Seed/Reset test accounts endpoint
+app.post('/make-server-3f59598d/seed', async (c) => {
+  try {
+    console.log('Manual seed initiated...');
+    const supabase = getSupabaseClient();
+
+    const testAccounts = [
+      {
+        email: 'admin@school.edu',
+        password: 'password123',
+        name: 'Admin User',
+        phone: '+1-555-0001',
+        department: 'Administration',
+        role: 'admin',
+      },
+      {
+        email: 'employee@school.edu',
+        password: 'password123',
+        name: 'Employee User',
+        phone: '+1-555-0002',
+        department: 'Mathematics',
+        role: 'employee',
+      },
+      {
+        email: 'driver@school.edu',
+        password: 'password123',
+        name: 'Driver User',
+        phone: '+1-555-0003',
+        department: 'Transport',
+        role: 'driver',
+      },
+    ];
+
+    const results = [];
+
+    for (const account of testAccounts) {
+      try {
+        // Try to create auth user
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: account.email,
+          password: account.password,
+          user_metadata: {
+            name: account.name,
+            phone: account.phone,
+            department: account.department,
+            role: account.role,
+          },
+          email_confirm: true,
+        });
+
+        let userId;
+        let authId;
+
+        if (authError) {
+          if (authError.message.includes('already been registered')) {
+            // User exists, get their ID by listing all users
+            const { data: { users }, error: listError } = await supabase.auth.admin.listUsers();
+            if (!listError) {
+              const existingUser = users.find((u: any) => u.email === account.email);
+              if (existingUser) {
+                authId = existingUser.id;
+                userId = `user:${existingUser.id}`;
+                results.push({ email: account.email, status: 'auth_exists', userId });
+              }
+            }
+          } else {
+            console.error(`Error creating auth account ${account.email}:`, authError);
+            results.push({ email: account.email, status: 'error', error: authError.message });
+            continue;
+          }
+        } else {
+          authId = authData.user.id;
+          userId = `user:${authData.user.id}`;
+          results.push({ email: account.email, status: 'created', userId });
+        }
+
+        // Create or update user profile in KV store
+        if (userId && authId) {
+          const userProfile = {
+            id: userId,
+            authId: authId,
+            name: account.name,
+            email: account.email,
+            phone: account.phone,
+            department: account.department,
+            role: account.role,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          await kv.set(userId, userProfile);
+          console.log(`✓ Profile synced for: ${account.email} -> ${userId}`);
+        }
+      } catch (error) {
+        console.error(`Error processing account ${account.email}:`, error);
+        results.push({ email: account.email, status: 'error', error: String(error) });
+      }
+    }
+
+    return c.json({ 
+      success: true, 
+      message: 'Seed completed',
+      results 
+    });
+  } catch (error) {
+    console.error('Error during seed:', error);
+    return c.json({ success: false, error: String(error) }, 500);
+  }
+});
+
 // Initialize test accounts on server start
 async function initializeTestAccounts() {
   try {
