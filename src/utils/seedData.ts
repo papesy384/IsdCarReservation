@@ -2,7 +2,9 @@ import { vehicleAPI, userAPI, bookingAPI } from './api';
 
 export async function seedDatabase() {
   try {
-    console.log('Starting database seeding...');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Starting database seeding...');
+    }
 
     // Seed Vehicles
     const vehicles = [
@@ -15,7 +17,9 @@ export async function seedDatabase() {
     for (const vehicle of vehicles) {
       await vehicleAPI.create(vehicle);
     }
-    console.log('✓ Vehicles seeded');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✓ Vehicles seeded');
+    }
 
     // Seed Users
     const users = [
@@ -29,7 +33,9 @@ export async function seedDatabase() {
     for (const user of users) {
       await userAPI.create(user);
     }
-    console.log('✓ Users seeded');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✓ Users seeded');
+    }
 
     // Seed Bookings
     const bookings = [
@@ -98,12 +104,15 @@ export async function seedDatabase() {
     for (const booking of bookings) {
       await bookingAPI.create(booking);
     }
-    console.log('✓ Bookings seeded');
-
-    console.log('Database seeding completed successfully!');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('✓ Bookings seeded');
+      console.log('Database seeding completed successfully!');
+    }
     return { success: true, message: 'Database seeded successfully' };
   } catch (error) {
-    console.error('Error seeding database:', error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error seeding database:', error);
+    }
     return { success: false, error: 'Failed to seed database' };
   }
 }

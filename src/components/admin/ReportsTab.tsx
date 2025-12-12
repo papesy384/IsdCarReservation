@@ -89,7 +89,9 @@ export function ReportsTab({ language }: { language: Language }) {
         setBookings(response.data);
       }
     } catch (error) {
-      console.error('Error loading report data:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error loading report data:', error);
+      }
     } finally {
       setLoading(false);
     }

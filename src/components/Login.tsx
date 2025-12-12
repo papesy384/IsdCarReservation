@@ -108,13 +108,16 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
       const result = await response.json();
       if (result.success) {
         toast.success('Test accounts created successfully! You can now login.');
-        console.log('Seed results:', result.results);
       } else {
         toast.error('Failed to create test accounts');
-        console.error('Seed error:', result.error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Seed error:', result.error);
+        }
       }
     } catch (err) {
-      console.error('Seed error:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Seed error:', err);
+      }
       toast.error('Failed to create test accounts');
     } finally {
       setSeeding(false);
@@ -137,7 +140,9 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
 
       onLogin(data.accessToken);
     } catch (err) {
-      console.error('Login error:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Login error:', err);
+      }
       setError(t.error);
       setLoading(false);
     }

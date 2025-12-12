@@ -20,7 +20,9 @@ export function useBookings(userId?: string) {
       }
     } catch (err) {
       setError('Failed to fetch bookings');
-      console.error(err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error(err);
+      }
     } finally {
       setLoading(false);
     }
@@ -50,7 +52,9 @@ export function usePendingBookings() {
       }
     } catch (err) {
       setError('Failed to fetch pending bookings');
-      console.error(err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error(err);
+      }
     } finally {
       setLoading(false);
     }
@@ -80,7 +84,9 @@ export function useVehicles() {
       }
     } catch (err) {
       setError('Failed to fetch vehicles');
-      console.error(err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error(err);
+      }
     } finally {
       setLoading(false);
     }
@@ -110,7 +116,9 @@ export function useUsers() {
       }
     } catch (err) {
       setError('Failed to fetch users');
-      console.error(err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error(err);
+      }
     } finally {
       setLoading(false);
     }
@@ -140,7 +148,9 @@ export function useDriverTrips() {
       }
     } catch (err) {
       setError('Failed to fetch trips');
-      console.error(err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error(err);
+      }
     } finally {
       setLoading(false);
     }

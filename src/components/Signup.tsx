@@ -109,7 +109,9 @@ export function Signup({ onSignup, onSwitchToLogin, language }: SignupProps) {
 
       onSignup(data.accessToken);
     } catch (err) {
-      console.error('Signup error:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Signup error:', err);
+      }
       setError(t.error);
       setLoading(false);
     }

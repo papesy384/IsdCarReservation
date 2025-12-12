@@ -37,7 +37,9 @@ export default function App() {
     const initDB = async () => {
       const hasSeeded = localStorage.getItem('db_seeded');
       if (!hasSeeded) {
-        console.log('Initializing database...');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Initializing database...');
+        }
         await seedDatabase();
         localStorage.setItem('db_seeded', 'true');
       }
@@ -56,7 +58,9 @@ export default function App() {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Error getting session:', error);
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Error getting session:', error);
+          }
           setIsCheckingAuth(false);
           return;
         }
@@ -80,7 +84,9 @@ export default function App() {
           }
         }
       } catch (error) {
-        console.error('Error checking session:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error checking session:', error);
+        }
       }
       
       setIsCheckingAuth(false);
@@ -90,14 +96,18 @@ export default function App() {
 
     // Listen for auth state changes (handles token refresh automatically)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Auth state changed:', event);
+      }
       
       if (event === 'SIGNED_OUT') {
         setUser(null);
         setAccessToken(null);
         setCurrentPage('login');
       } else if (event === 'TOKEN_REFRESHED' && session) {
-        console.log('Token refreshed automatically');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Token refreshed automatically');
+        }
         setAccessToken(session.access_token);
       } else if (session) {
         // Update token if session exists
@@ -129,7 +139,9 @@ export default function App() {
         }
       }
     } catch (error) {
-      console.error('Authentication error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Authentication error:', error);
+      }
     }
   };
 
@@ -139,10 +151,14 @@ export default function App() {
       const { error } = await supabase.auth.signOut();
       
       if (error) {
-        console.error('Supabase logout error:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Supabase logout error:', error);
+        }
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Logout error:', error);
+      }
     }
     
     // Clean up local state

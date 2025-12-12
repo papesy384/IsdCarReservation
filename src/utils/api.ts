@@ -52,7 +52,7 @@ export const authAPI = {
         password: data.password,
       });
 
-      if (authError) {
+      if (authError && process.env.NODE_ENV === 'development') {
         console.error('Error creating session after signup:', authError);
         // Still return success since account was created
       }
@@ -69,7 +69,9 @@ export const authAPI = {
     });
 
     if (authError || !authData.session) {
-      console.error('Login error:', authError);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Login error:', authError);
+      }
       return { success: false, error: authError?.message || 'Invalid email or password' };
     }
 
