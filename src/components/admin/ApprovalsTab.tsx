@@ -57,6 +57,10 @@ const translations = {
     searchPlaceholder: 'Search by name, destination, or department...',
     filterByDept: 'All Departments',
     filterByStatus: 'All Statuses',
+    statusPending: 'Pending',
+    statusApproved: 'Approved',
+    statusDenied: 'Denied',
+    statusCancelled: 'Cancelled',
     results: 'results',
     emptyTitle: 'All caught up!',
     emptyDescription: 'No pending booking approvals at the moment. New requests will appear here.',
@@ -98,6 +102,10 @@ const translations = {
     searchPlaceholder: 'Rechercher par nom, destination ou département...',
     filterByDept: 'Tous les départements',
     filterByStatus: 'Tous les statuts',
+    statusPending: 'En attente',
+    statusApproved: 'Approuvé',
+    statusDenied: 'Refusé',
+    statusCancelled: 'Annulé',
     results: 'résultats',
     emptyTitle: 'Tout est à jour!',
     emptyDescription: 'Aucune approbation de réservation en attente pour le moment. Les nouvelles demandes apparaîtront ici.',
@@ -368,10 +376,10 @@ export function ApprovalsTab({ language }: { language: Language }) {
             </SelectTrigger>
             <SelectContent className="bg-black/95 backdrop-blur-xl border-white/10">
               <SelectItem value="all" className="text-white hover:bg-white/10">{t.filterByStatus}</SelectItem>
-              <SelectItem value="pending" className="text-white hover:bg-white/10">Pending</SelectItem>
-              <SelectItem value="approved" className="text-white hover:bg-white/10">Approved</SelectItem>
-              <SelectItem value="denied" className="text-white hover:bg-white/10">Denied</SelectItem>
-              <SelectItem value="cancelled" className="text-white hover:bg-white/10">Cancelled</SelectItem>
+              <SelectItem value="pending" className="text-white hover:bg-white/10">{t.statusPending}</SelectItem>
+              <SelectItem value="approved" className="text-white hover:bg-white/10">{t.statusApproved}</SelectItem>
+              <SelectItem value="denied" className="text-white hover:bg-white/10">{t.statusDenied}</SelectItem>
+              <SelectItem value="cancelled" className="text-white hover:bg-white/10">{t.statusCancelled}</SelectItem>
             </SelectContent>
           </Select>
         </div>
