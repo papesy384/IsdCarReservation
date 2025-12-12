@@ -440,7 +440,6 @@ export function ApprovalsTab({ language }: { language: Language }) {
 
   return (
     <div className="space-y-6">
-<<<<<<< HEAD
       {/* Stats Cards */}
       {!showPastBookings && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -595,7 +594,6 @@ export function ApprovalsTab({ language }: { language: Language }) {
         </Button>
       </div>
 
-<<<<<<< HEAD
       {/* Active Filters */}
       {hasActiveFilters && (
         <div className="flex flex-wrap items-center gap-3">
@@ -642,7 +640,6 @@ export function ApprovalsTab({ language }: { language: Language }) {
         <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
           <EmptyState
             icon={Search}
-<<<<<<< HEAD
             title={showPastBookings ? t.noPastBookings : (hasActiveFilters ? "No bookings match your filters" : t.emptyTitle)}
             description={showPastBookings ? "All past bookings are displayed here for reference." : (hasActiveFilters ? "Try adjusting your search or filter criteria to see more results." : t.emptyDescription)}
             secondaryActionLabel={showPastBookings ? undefined : (hasActiveFilters ? "Clear Filters" : undefined)}
