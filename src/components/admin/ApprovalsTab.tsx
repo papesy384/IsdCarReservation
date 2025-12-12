@@ -1,8 +1,9 @@
-import { Check, X, Calendar, Users, MapPin, Search, Filter, RefreshCw, Download, CheckSquare, Square } from 'lucide-react';
+import { Check, X, Calendar, Users, MapPin, Search, Filter, RefreshCw, Download, CheckSquare, Square, AlertCircle } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { StatusBadge } from '../ui/status-badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import { Alert, AlertDescription } from '../ui/alert';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
@@ -75,6 +76,8 @@ const translations = {
     failedToApproveSome: 'Failed to approve some bookings',
     failedToDeny: 'Failed to deny booking',
     failedToDenySome: 'Failed to deny some bookings',
+    pastDateWarning: 'This booking date has already passed',
+    cannotApprovePast: 'Cannot approve a booking for a past date',
   },
   fr: {
     noPending: 'Aucune approbation en attente',
@@ -120,6 +123,8 @@ const translations = {
     failedToApproveSome: 'Échec de l\'approbation de certaines réservations',
     failedToDeny: 'Échec du refus de la réservation',
     failedToDenySome: 'Échec du refus de certaines réservations',
+    pastDateWarning: 'La date de cette réservation est déjà passée',
+    cannotApprovePast: 'Impossible d\'approuver une réservation pour une date passée',
   },
 };
 
@@ -132,7 +137,23 @@ export function ApprovalsTab({ language }: { language: Language }) {
   const [selectedRequests, setSelectedRequests] = useState<Set<string>>(new Set());
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleApprove = async (id: string) => {
+  const isBookingDatePassed = (request: BookingRequest): boolean => {
+    try {
+      const bookingDateTime = new Date(`${request.date}T${request.time}`);
+      const now = new Date();
+      return bookingDateTime < now;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleApprove = async (id: string, request: BookingRequest) => {
+    // Check if booking date has passed
+    if (isBookingDatePassed(request)) {
+      toast.error(t.cannotApprovePast);
+      return;
+    }
+
     setIsProcessing(true);
     const bookingId = id.replace('booking:', '');
     const response = await bookingAPI.updateStatus(bookingId, 'approved');
@@ -147,15 +168,33 @@ export function ApprovalsTab({ language }: { language: Language }) {
   };
 
   const handleBulkApprove = async () => {
+    // Filter out past-dated bookings
+    const validRequests = Array.from(selectedRequests)
+      .map(id => requests.find(r => r.id === id))
+      .filter((r): r is BookingRequest => r !== undefined && !isBookingDatePassed(r));
+    
+    const pastRequests = Array.from(selectedRequests)
+      .map(id => requests.find(r => r.id === id))
+      .filter((r): r is BookingRequest => r !== undefined && isBookingDatePassed(r));
+
+    if (pastRequests.length > 0) {
+      toast.error(`${pastRequests.length} ${t.cannotApprovePast}`);
+    }
+
+    if (validRequests.length === 0) {
+      setIsProcessing(false);
+      return;
+    }
+
     setIsProcessing(true);
-    const promises = Array.from(selectedRequests).map(id => {
-      const bookingId = id.replace('booking:', '');
+    const promises = validRequests.map(request => {
+      const bookingId = request.id.replace('booking:', '');
       return bookingAPI.updateStatus(bookingId, 'approved');
     });
     
     try {
       await Promise.all(promises);
-      toast.success(`${selectedRequests.size} ${t.approved}`);
+      toast.success(`${validRequests.length} ${t.approved}`);
       setSelectedRequests(new Set());
       refetch();
     } catch (error) {
@@ -482,13 +521,20 @@ export function ApprovalsTab({ language }: { language: Language }) {
                   </div>
 
                   {request.status === 'pending' && (
-                    <div className="flex gap-3">
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white h-12 shadow-lg"
-                            disabled={isProcessing}
-                          >
+                    <div className="flex flex-col gap-3">
+                      {isBookingDatePassed(request) && (
+                        <Alert className="bg-yellow-500/10 border-yellow-500/30 text-yellow-500">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertDescription>{t.pastDateWarning}</AlertDescription>
+                        </Alert>
+                      )}
+                      <div className="flex gap-3">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white h-12 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                              disabled={isProcessing || isBookingDatePassed(request)}
+                            >
                             {isProcessing ? (
                               <>
                                 <div className="h-5 w-5 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -507,6 +553,11 @@ export function ApprovalsTab({ language }: { language: Language }) {
                             <AlertDialogTitle className="text-white">{t.approveConfirmTitle}</AlertDialogTitle>
                             <AlertDialogDescription className="text-gray-400">
                               {t.approveConfirmDesc}
+                              {isBookingDatePassed(request) && (
+                                <div className="mt-2 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded text-yellow-500 text-sm">
+                                  ⚠️ {t.pastDateWarning}
+                                </div>
+                              )}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
@@ -514,8 +565,9 @@ export function ApprovalsTab({ language }: { language: Language }) {
                               {t.cancel}
                             </AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleApprove(request.id)}
+                              onClick={() => handleApprove(request.id, request)}
                               className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white"
+                              disabled={isBookingDatePassed(request)}
                             >
                               {t.confirmApprove}
                             </AlertDialogAction>
@@ -523,6 +575,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
                         </AlertDialogContent>
                       </AlertDialog>
                       <DenyDialog requestId={request.id} onDeny={handleDeny} t={t} isProcessing={isProcessing} />
+                      </div>
                     </div>
                   )}
                 </div>
