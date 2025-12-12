@@ -756,7 +756,14 @@ export function ApprovalsTab({ language }: { language: Language }) {
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
-                      <DenyDialog requestId={request.id} onDeny={handleDeny} t={t} isProcessing={isProcessing} />
+                      <DenyDialog 
+                        requestId={request.id} 
+                        request={request}
+                        onDeny={handleDeny} 
+                        t={t} 
+                        isProcessing={isProcessing}
+                        isPastDate={isBookingDatePassed(request)}
+                      />
                     </div>
                   )}
                 </div>
@@ -771,12 +778,14 @@ export function ApprovalsTab({ language }: { language: Language }) {
 
 interface DenyDialogProps {
   requestId: string;
-  onDeny: (id: string) => void;
+  request: BookingRequest;
+  onDeny: (id: string, request: BookingRequest) => void;
   t: typeof translations['en'];
   isProcessing: boolean;
+  isPastDate: boolean;
 }
 
-function DenyDialog({ requestId, onDeny, t, isProcessing }: DenyDialogProps) {
+function DenyDialog({ requestId, request, onDeny, t, isProcessing, isPastDate }: DenyDialogProps) {
   const [reason, setReason] = useState('');
 
   return (
@@ -784,8 +793,8 @@ function DenyDialog({ requestId, onDeny, t, isProcessing }: DenyDialogProps) {
       <AlertDialogTrigger asChild>
         <Button
           variant="destructive"
-          className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 h-12 shadow-lg"
-          disabled={isProcessing}
+          className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 h-12 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isProcessing || isPastDate}
         >
           {isProcessing ? (
             <>
@@ -822,8 +831,9 @@ function DenyDialog({ requestId, onDeny, t, isProcessing }: DenyDialogProps) {
             {t.cancel}
           </AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => onDeny(requestId)}
+            onClick={() => onDeny(requestId, request)}
             className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
+            disabled={isPastDate}
           >
             {t.confirmDeny}
           </AlertDialogAction>
