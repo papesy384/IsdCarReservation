@@ -176,7 +176,7 @@ const translations = {
 
 export function ApprovalsTab({ language }: { language: Language }) {
   const t = translations[language];
-  const { bookings: requests, loading, refetch } = usePendingBookings();
+  const { bookings: requests, loading, refetch } = useBookings();
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [selectedRequests, setSelectedRequests] = useState<Set<string>>(new Set());
