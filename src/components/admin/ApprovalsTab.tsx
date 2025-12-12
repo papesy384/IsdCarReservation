@@ -16,6 +16,7 @@ import { useState, useEffect } from 'react';
 import { exportBookingsToCSV } from '../../utils/export';
 import { EmptyState } from '../ui/empty-state';
 import { TableSkeleton } from '../ui/skeleton';
+import { FilterChip } from '../ui/filter-chip';
 
 interface BookingRequest {
   id: string;
@@ -87,6 +88,14 @@ const translations = {
     reminder12Hours: 'Reminder 12 hours before',
     reminderActive: 'Reminder active',
     noPastBookings: 'No past bookings',
+    statsPending: 'Pending',
+    statsApproved: 'Approved',
+    statsDenied: 'Denied',
+    statsCancelled: 'Cancelled',
+    statsTotal: 'Total',
+    clearFilters: 'Clear All Filters',
+    activeReminders: 'Active Reminders',
+    activeFilters: 'Active filters',
   },
   fr: {
     noPending: 'Aucune approbation en attente',
@@ -143,6 +152,14 @@ const translations = {
     reminder12Hours: 'Rappel 12 heures avant',
     reminderActive: 'Rappel actif',
     noPastBookings: 'Aucune réservation passée',
+    statsPending: 'En attente',
+    statsApproved: 'Approuvé',
+    statsDenied: 'Refusé',
+    statsCancelled: 'Annulé',
+    statsTotal: 'Total',
+    clearFilters: 'Effacer tous les filtres',
+    activeReminders: 'Rappels actifs',
+    activeFilters: 'Filtres actifs',
   },
 };
 
@@ -368,6 +385,22 @@ export function ApprovalsTab({ language }: { language: Language }) {
   const pastBookings = requests.filter((request: BookingRequest) => isBookingDatePassed(request));
   const upcomingBookings = requests.filter((request: BookingRequest) => !isBookingDatePassed(request));
 
+  // Calculate statistics
+  const stats = {
+    pending: requests.filter((r: BookingRequest) => r.status === 'pending' && !isBookingDatePassed(r)).length,
+    approved: requests.filter((r: BookingRequest) => r.status === 'approved' && !isBookingDatePassed(r)).length,
+    denied: requests.filter((r: BookingRequest) => r.status === 'denied' && !isBookingDatePassed(r)).length,
+    cancelled: requests.filter((r: BookingRequest) => r.status === 'cancelled' && !isBookingDatePassed(r)).length,
+    total: upcomingBookings.length,
+    activeReminders: Array.from(reminders).filter(id => {
+      const request = requests.find(r => r.id === id);
+      return request && !isBookingDatePassed(request) && request.status === 'approved';
+    }).length,
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters = searchQuery !== '' || departmentFilter !== 'all' || statusFilter !== 'all';
+
   // Filter bookings based on search, department, and status
   const bookingsToShow = showPastBookings ? pastBookings : upcomingBookings;
   
@@ -410,8 +443,51 @@ export function ApprovalsTab({ language }: { language: Language }) {
     );
   }
 
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setDepartmentFilter('all');
+    setStatusFilter('all');
+  };
+
   return (
     <div className="space-y-6">
+      {/* Stats Cards */}
+      {!showPastBookings && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <Card className="p-4 border border-white/10 bg-white/5 backdrop-blur-xl">
+            <div className="text-2xl font-bold text-[#FFD700]">{stats.total}</div>
+            <div className="text-sm text-gray-400">{t.statsTotal}</div>
+          </Card>
+          <Card className="p-4 border border-yellow-500/30 bg-yellow-500/10 backdrop-blur-xl">
+            <div className="text-2xl font-bold text-yellow-500">{stats.pending}</div>
+            <div className="text-sm text-gray-400">{t.statsPending}</div>
+          </Card>
+          <Card className="p-4 border border-green-500/30 bg-green-500/10 backdrop-blur-xl">
+            <div className="text-2xl font-bold text-green-500">{stats.approved}</div>
+            <div className="text-sm text-gray-400">{t.statsApproved}</div>
+          </Card>
+          <Card className="p-4 border border-red-500/30 bg-red-500/10 backdrop-blur-xl">
+            <div className="text-2xl font-bold text-red-500">{stats.denied}</div>
+            <div className="text-sm text-gray-400">{t.statsDenied}</div>
+          </Card>
+          <Card className="p-4 border border-gray-500/30 bg-gray-500/10 backdrop-blur-xl">
+            <div className="text-2xl font-bold text-gray-400">{stats.cancelled}</div>
+            <div className="text-sm text-gray-400">{t.statsCancelled}</div>
+          </Card>
+          {stats.activeReminders > 0 && (
+            <Card className="p-4 border border-[#FFD700]/50 bg-[#FFD700]/20 backdrop-blur-xl">
+              <div className="flex items-center gap-2">
+                <Bell className="h-5 w-5 text-[#FFD700]" />
+                <div>
+                  <div className="text-2xl font-bold text-[#FFD700]">{stats.activeReminders}</div>
+                  <div className="text-sm text-gray-400">{t.activeReminders}</div>
+                </div>
+              </div>
+            </Card>
+          )}
+        </div>
+      )}
+
       {/* Bulk Actions Toolbar */}
       {selectedRequests.size > 0 && (
         <Card className="p-4 border border-[#FFD700] bg-[#FFD700]/10 backdrop-blur-xl shadow-lg">
@@ -562,8 +638,42 @@ export function ApprovalsTab({ language }: { language: Language }) {
         </Button>
       </div>
 
+      {/* Active Filters */}
+      {hasActiveFilters && (
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-sm text-gray-400">{t.activeFilters}:</span>
+          {searchQuery && (
+            <FilterChip
+              label={`Search: "${searchQuery}"`}
+              onRemove={() => setSearchQuery('')}
+            />
+          )}
+          {departmentFilter !== 'all' && (
+            <FilterChip
+              label={`Department: ${departmentFilter}`}
+              onRemove={() => setDepartmentFilter('all')}
+            />
+          )}
+          {statusFilter !== 'all' && (
+            <FilterChip
+              label={`Status: ${t[`status${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}` as keyof typeof t] || statusFilter}`}
+              onRemove={() => setStatusFilter('all')}
+            />
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearAllFilters}
+            className="text-gray-400 hover:text-white hover:bg-white/10"
+          >
+            <X className="h-4 w-4 mr-1" />
+            {t.clearFilters}
+          </Button>
+        </div>
+      )}
+
       {/* Results Count */}
-      {(searchQuery || departmentFilter !== 'all' || statusFilter !== 'all') && (
+      {hasActiveFilters && (
         <div className="text-sm text-gray-400">
           {filteredRequests.length} {t.results}
         </div>
@@ -574,14 +684,10 @@ export function ApprovalsTab({ language }: { language: Language }) {
         <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
           <EmptyState
             icon={Search}
-            title={showPastBookings ? t.noPastBookings : "No approvals match your filters"}
-            description={showPastBookings ? "" : "Try adjusting your search or filter criteria"}
-            secondaryActionLabel={showPastBookings ? undefined : "Clear Filters"}
-            onSecondaryAction={showPastBookings ? undefined : () => {
-              setSearchQuery('');
-              setDepartmentFilter('all');
-              setStatusFilter('all');
-            }}
+            title={showPastBookings ? t.noPastBookings : (hasActiveFilters ? "No bookings match your filters" : t.emptyTitle)}
+            description={showPastBookings ? "All past bookings are displayed here for reference." : (hasActiveFilters ? "Try adjusting your search or filter criteria to see more results." : t.emptyDescription)}
+            secondaryActionLabel={showPastBookings ? undefined : (hasActiveFilters ? "Clear Filters" : undefined)}
+            onSecondaryAction={showPastBookings ? undefined : (hasActiveFilters ? clearAllFilters : undefined)}
           />
         </Card>
       ) : (
