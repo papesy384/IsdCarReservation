@@ -14,7 +14,7 @@ import { bookingAPI } from '../../utils/api';
 import { useState } from 'react';
 import { exportBookingsToCSV } from '../../utils/export';
 import { EmptyState } from '../ui/empty-state';
-import { BookingListSkeleton } from '../ui/loading-skeletons';
+import { TableSkeleton } from '../ui/skeleton';
 
 interface BookingRequest {
   id: string;
@@ -66,10 +66,10 @@ const translations = {
     bulkDeny: 'Deny Selected',
     approving: 'Approving...',
     denying: 'Denying...',
-    refreshBookings: 'Refresh bookings',
-    noApprovalsMatch: 'No approvals match your filters',
-    tryAdjusting: 'Try adjusting your search or filter criteria',
-    clearFilters: 'Clear Filters',
+    failedToApprove: 'Failed to approve booking',
+    failedToApproveSome: 'Failed to approve some bookings',
+    failedToDeny: 'Failed to deny booking',
+    failedToDenySome: 'Failed to deny some bookings',
   },
   fr: {
     noPending: 'Aucune approbation en attente',
@@ -106,10 +106,10 @@ const translations = {
     bulkDeny: 'Refuser la sélection',
     approving: 'Approbation...',
     denying: 'Refus...',
-    refreshBookings: 'Actualiser les réservations',
-    noApprovalsMatch: 'Aucune approbation ne correspond à vos filtres',
-    tryAdjusting: 'Essayez d\'ajuster vos critères de recherche ou de filtre',
-    clearFilters: 'Effacer les filtres',
+    failedToApprove: 'Échec de l\'approbation de la réservation',
+    failedToApproveSome: 'Échec de l\'approbation de certaines réservations',
+    failedToDeny: 'Échec du refus de la réservation',
+    failedToDenySome: 'Échec du refus de certaines réservations',
   },
 };
 
@@ -130,7 +130,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
       toast.success(t.approved);
       refetch();
     } else {
-      toast.error('Échec de l\'approbation de la réservation');
+      toast.error(t.failedToApprove);
     }
     setIsProcessing(false);
   };
@@ -148,7 +148,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
       setSelectedRequests(new Set());
       refetch();
     } catch (error) {
-      toast.error('Échec de l\'approbation de certaines réservations');
+      toast.error(t.failedToApproveSome);
     } finally {
       setIsProcessing(false);
     }
@@ -167,7 +167,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
       setSelectedRequests(new Set());
       refetch();
     } catch (error) {
-      toast.error('Échec du refus de certaines réservations');
+      toast.error(t.failedToDenySome);
     } finally {
       setIsProcessing(false);
     }
@@ -200,13 +200,17 @@ export function ApprovalsTab({ language }: { language: Language }) {
       toast.error(t.denied);
       refetch();
     } else {
-      toast.error('Échec du refus de la réservation');
+      toast.error(t.failedToDeny);
     }
     setIsProcessing(false);
   };
 
   if (loading) {
-    return <BookingListSkeleton count={5} />;
+    return (
+      <div className="space-y-6">
+        <TableSkeleton rows={3} />
+      </div>
+    );
   }
 
   const pendingRequests = requests.filter(r => r.status === 'pending');
@@ -358,7 +362,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
           onClick={refetch}
           variant="outline"
           className="h-12 px-6 bg-white/10 border-white/20 text-white hover:bg-white/20"
-          title={t.refreshBookings}
+          title="Refresh bookings"
         >
           <RefreshCw className="h-5 w-5" />
         </Button>
@@ -376,9 +380,9 @@ export function ApprovalsTab({ language }: { language: Language }) {
         <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
           <EmptyState
             icon={Search}
-            title={t.noApprovalsMatch}
-            description={t.tryAdjusting}
-            secondaryActionLabel={t.clearFilters}
+            title="No approvals match your filters"
+            description="Try adjusting your search or filter criteria"
+            secondaryActionLabel="Clear Filters"
             onSecondaryAction={() => {
               setSearchQuery('');
               setDepartmentFilter('all');
@@ -412,7 +416,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
                       </h3>
                       <p className="text-gray-400">{t.department}: {request.department}</p>
                     </div>
-                    <StatusBadge status={request.status} language={language} />
+                    <StatusBadge status={request.status} />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">

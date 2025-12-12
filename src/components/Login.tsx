@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Alert, AlertDescription } from './ui/alert';
 import { authAPI, supabase } from '../utils/api';
+import { projectId, publicAnonKey } from '../utils/supabase/info';
 import { AnimatedBackground } from './AnimatedBackground';
 import { Language } from '../App';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Mail, Lock, Loader2, Eye, EyeOff, Globe, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Loader2, Eye, EyeOff, Globe, CheckCircle2, AlertCircle, Car } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface LoginProps {
   onLogin: (accessToken: string) => void;
@@ -42,10 +44,12 @@ const translations = {
     feature2Desc: 'Instant approval notifications and status tracking',
     feature3Title: 'Comprehensive Analytics',
     feature3Desc: 'Advanced reporting and insights dashboard',
+    stat1: '24/7',
     stat1Label: 'Available',
+    stat2: '100%',
     stat2Label: 'Secure',
+    stat3: 'Fast',
     stat3Label: 'Approval',
-    footer: '© 2024 ISD Car Reservation. All rights reserved.',
   },
   fr: {
     title: 'Réservation de Voitures ISD',
@@ -66,16 +70,18 @@ const translations = {
     employee: 'Employé',
     driver: 'Chauffeur',
     forgotPassword: 'Mot de passe oublié?',
-    feature1Title: 'Système de Réservation Intelligent',
-    feature1Desc: 'Processus de réservation de véhicules rationalisé',
-    feature2Title: 'Mises à Jour en Temps Réel',
-    feature2Desc: 'Notifications d\'approbation instantanées et suivi du statut',
-    feature3Title: 'Analyses Complètes',
-    feature3Desc: 'Tableau de bord de rapports et d\'analyses avancés',
+    feature1Title: 'Système de réservation intelligent',
+    feature1Desc: 'Processus de réservation de véhicule simplifié',
+    feature2Title: 'Mises à jour en temps réel',
+    feature2Desc: 'Notifications d\'approbation instantanées et suivi de statut',
+    feature3Title: 'Analyses complètes',
+    feature3Desc: 'Tableau de bord de rapports et d\'informations avancés',
+    stat1: '24/7',
     stat1Label: 'Disponible',
+    stat2: '100%',
     stat2Label: 'Sécurisé',
+    stat3: 'Rapide',
     stat3Label: 'Approbation',
-    footer: '© 2024 Réservation de Voitures ISD. Tous droits réservés.',
   },
 };
 
@@ -86,6 +92,34 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+
+  const handleSeed = async () => {
+    setSeeding(true);
+    setError('');
+    try {
+      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-3f59598d/seed`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${publicAnonKey}`,
+        },
+      });
+      const result = await response.json();
+      if (result.success) {
+        toast.success('Test accounts created successfully! You can now login.');
+        console.log('Seed results:', result.results);
+      } else {
+        toast.error('Failed to create test accounts');
+        console.error('Seed error:', result.error);
+      }
+    } catch (err) {
+      console.error('Seed error:', err);
+      toast.error('Failed to create test accounts');
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,7 +177,7 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#FFD700]/20">
-                <img src="/images/SchoolLogo.png" alt="ISD Logo" className="w-10 h-10 object-contain" />
+                <Car className="w-10 h-10 object-contain" />
               </div>
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-[#FFD700] via-[#FFD700] to-white bg-clip-text text-transparent">
@@ -190,15 +224,15 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/10">
             <div>
-              <div className="text-3xl font-bold text-[#FFD700]">24/7</div>
+              <div className="text-3xl font-bold text-[#FFD700]">{t.stat1}</div>
               <div className="text-sm text-gray-400">{t.stat1Label}</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-[#FFD700]">100%</div>
+              <div className="text-3xl font-bold text-[#FFD700]">{t.stat2}</div>
               <div className="text-sm text-gray-400">{t.stat2Label}</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-[#FFD700]">Rapide</div>
+              <div className="text-3xl font-bold text-[#FFD700]">{t.stat3}</div>
               <div className="text-sm text-gray-400">{t.stat3Label}</div>
             </div>
           </div>
@@ -209,7 +243,7 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-[#FFD700]/20">
-              <img src="/images/SchoolLogo.png" alt="ISD Logo" className="w-10 h-10 object-contain" />
+              <Car className="w-10 h-10 object-contain" />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-[#FFD700] via-[#FFD700] to-white bg-clip-text text-transparent">
               {t.title}
@@ -340,13 +374,21 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
                     {t.driver}
                   </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleSeed}
+                  disabled={seeding}
+                  className="mt-3 w-full px-3 py-2 text-xs rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {seeding ? 'Creating Test Accounts...' : '🌱 Seed Test Accounts'}
+                </button>
               </div>
             </CardContent>
           </Card>
 
           {/* Footer */}
           <p className="text-center text-xs text-gray-500 mt-6">
-            {t.footer}
+            © 2024 ISD Car Reservation. All rights reserved.
           </p>
         </div>
       </div>

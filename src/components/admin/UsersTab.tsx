@@ -12,7 +12,6 @@ import { useUsers } from '../../hooks/useBackend';
 import { userAPI } from '../../utils/api';
 import { ConfirmDialog } from '../ConfirmDialog';
 import { exportUsersToCSV } from '../../utils/export';
-import { BookingListSkeleton } from '../ui/loading-skeletons';
 
 interface UserData {
   id: string;
@@ -27,6 +26,10 @@ const translations = {
   en: {
     addUser: 'Add User',
     editUser: 'Edit User',
+    edit: 'Edit',
+    deleteUser: 'Delete User',
+    delete: 'Delete',
+    cancel: 'Cancel',
     name: 'Name',
     email: 'Email',
     phone: 'Phone Number',
@@ -42,17 +45,20 @@ const translations = {
     searchPlaceholder: 'Search users...',
     filterByRole: 'Filter by role',
     allRoles: 'All Roles',
-    edit: 'Edit',
-    delete: 'Delete',
-    deleteUser: 'Delete User',
-    deleteUserConfirm: 'Are you sure you want to delete',
-    deleteUserConfirmDesc: 'This action cannot be undone.',
-    exportCSV: 'Export CSV',
-    cancel: 'Cancel',
+    failedToAdd: 'Failed to add user',
+    failedToUpdate: 'Failed to update user',
+    failedToDelete: 'Failed to delete user',
+    deleteConfirmTitle: 'Delete User',
+    deleteConfirmDescription: 'Are you sure you want to delete',
+    deleteConfirmSuffix: 'This action cannot be undone.',
   },
   fr: {
     addUser: 'Ajouter un utilisateur',
     editUser: 'Modifier l\'utilisateur',
+    edit: 'Modifier',
+    deleteUser: 'Supprimer l\'utilisateur',
+    delete: 'Supprimer',
+    cancel: 'Annuler',
     name: 'Nom',
     email: 'Email',
     phone: 'Numéro de téléphone',
@@ -68,13 +74,12 @@ const translations = {
     searchPlaceholder: 'Rechercher des utilisateurs...',
     filterByRole: 'Filtrer par rôle',
     allRoles: 'Tous les rôles',
-    edit: 'Modifier',
-    delete: 'Supprimer',
-    deleteUser: 'Supprimer l\'utilisateur',
-    deleteUserConfirm: 'Êtes-vous sûr de vouloir supprimer',
-    deleteUserConfirmDesc: 'Cette action ne peut pas être annulée.',
-    exportCSV: 'Exporter CSV',
-    cancel: 'Annuler',
+    failedToAdd: 'Échec de l\'ajout de l\'utilisateur',
+    failedToUpdate: 'Échec de la mise à jour de l\'utilisateur',
+    failedToDelete: 'Échec de la suppression de l\'utilisateur',
+    deleteConfirmTitle: 'Supprimer l\'utilisateur',
+    deleteConfirmDescription: 'Êtes-vous sûr de vouloir supprimer',
+    deleteConfirmSuffix: 'Cette action ne peut pas être annulée.',
   },
 };
 
@@ -107,7 +112,7 @@ export function UsersTab({ language }: { language: Language }) {
       toast.success(t.userAdded);
       refetch();
     } else {
-      toast.error('Échec de l\'ajout de l\'utilisateur');
+      toast.error(t.failedToAdd);
     }
   };
 
@@ -122,7 +127,7 @@ export function UsersTab({ language }: { language: Language }) {
         toast.success(t.userUpdated);
         refetch();
       } else {
-        toast.error('Échec de la mise à jour de l\'utilisateur');
+        toast.error(t.failedToUpdate);
       }
     }
   };
@@ -135,12 +140,17 @@ export function UsersTab({ language }: { language: Language }) {
       toast.success(t.userDeleted);
       refetch();
     } else {
-      toast.error('Échec de la suppression de l\'utilisateur');
+      toast.error(t.failedToDelete);
     }
   };
 
   if (loading) {
-    return <BookingListSkeleton count={5} />;
+    return (
+      <div className="text-center py-12">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[#FFD700] border-r-transparent"></div>
+        <p className="mt-4 text-gray-600">Loading users...</p>
+      </div>
+    );
   }
 
   const UserForm = ({ onSubmit }: { onSubmit: () => void }) => (
@@ -265,7 +275,7 @@ export function UsersTab({ language }: { language: Language }) {
           onClick={() => exportUsersToCSV(users)}
         >
           <Download className="h-5 w-5 mr-2" />
-          {t.exportCSV}
+          Export CSV
         </Button>
       </div>
 
@@ -332,8 +342,8 @@ export function UsersTab({ language }: { language: Language }) {
         open={deleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
         onConfirm={() => userToDelete && handleDelete(userToDelete.id)}
-        title={t.deleteUser}
-        description={`${t.deleteUserConfirm} "${userToDelete?.name}"? ${t.deleteUserConfirmDesc}`}
+        title={t.deleteConfirmTitle}
+        description={`${t.deleteConfirmDescription} "${userToDelete?.name}"? ${t.deleteConfirmSuffix}`}
         confirmText={t.delete}
         cancelText={t.cancel}
         variant="destructive"

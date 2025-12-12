@@ -15,8 +15,7 @@ import { toast } from 'sonner@2.0.3';
 import { DateRangePicker, DateRange } from './DateRangePicker';
 import { exportBookingsToCSV } from '../utils/export';
 import { EmptyState } from './ui/empty-state';
-import { BookingListSkeleton, StatsCardsSkeleton } from './ui/loading-skeletons';
-import { Skeleton } from './ui/skeleton';
+import { TableSkeleton } from './ui/skeleton';
 
 interface Booking {
   id: string;
@@ -74,6 +73,9 @@ const translations = {
     bulkCancel: 'Cancel Selected',
     bulkExport: 'Export Selected',
     cancelling: 'Cancelling...',
+    failedToCancel: 'Failed to cancel booking',
+    failedToCancelSome: 'Failed to cancel some bookings',
+    failedToUpdate: 'Failed to update booking',
   },
   fr: {
     title: 'Mes réservations',
@@ -118,6 +120,9 @@ const translations = {
     bulkCancel: 'Annuler la sélection',
     bulkExport: 'Exporter la sélection',
     cancelling: 'Annulation...',
+    failedToCancel: 'Échec de l\'annulation de la réservation',
+    failedToCancelSome: 'Échec de l\'annulation de certaines réservations',
+    failedToUpdate: 'Échec de la mise à jour de la réservation',
   },
 };
 
@@ -139,7 +144,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
       toast.success(t.cancelled_msg);
       refetch();
     } else {
-      toast.error('Échec de l\'annulation de la réservation');
+      toast.error(t.failedToCancel);
     }
     setIsCancelling(false);
   };
@@ -157,7 +162,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
       setSelectedBookings(new Set());
       refetch();
     } catch (error) {
-      toast.error('Échec de l\'annulation de certaines réservations');
+      toast.error(t.failedToCancelSome);
     } finally {
       setIsCancelling(false);
     }
@@ -195,11 +200,10 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
       <div className="min-h-screen py-8 px-4">
         <div className="container mx-auto">
           <div className="mb-8">
-            <Skeleton className="h-10 w-48 mb-2" />
-            <Skeleton className="h-5 w-64" />
+            <div className="h-10 w-48 bg-white/10 rounded-lg animate-pulse mb-2"></div>
+            <div className="h-5 w-64 bg-white/5 rounded animate-pulse"></div>
           </div>
-          <StatsCardsSkeleton />
-          <BookingListSkeleton count={5} />
+          <TableSkeleton rows={5} />
         </div>
       </div>
     );
@@ -241,7 +245,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
         <div className="container mx-auto">
           <div className="mb-8">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent mb-2">{t.title}</h1>
-            <p className="text-gray-400">Consultez et gérez vos demandes de réservation</p>
+            <p className="text-gray-400">View and manage your booking requests</p>
           </div>
           <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
             <EmptyState
@@ -249,7 +253,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
               title={t.emptyTitle}
               description={t.emptyDescription}
               actionLabel={t.emptyAction}
-              onAction={() => toast.info('Aller au formulaire de réservation')}
+              onAction={() => toast.info('Navigate to booking form')}
             />
           </Card>
         </div>
@@ -381,11 +385,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
               <SelectTrigger className="w-full md:w-48 bg-white/10 border-white/20 text-white focus:border-[#FFD700]">
                 <Filter className="h-4 w-4 mr-2 text-[#FFD700]" />
                 <SelectValue>
-                  {filterStatus === 'all' ? t.allStatuses : 
-                   filterStatus === 'pending' ? t.pending :
-                   filterStatus === 'approved' ? t.approved :
-                   filterStatus === 'denied' ? t.denied :
-                   t.cancelled}
+                  {filterStatus === 'all' ? t.allStatuses : filterStatus.charAt(0).toUpperCase() + filterStatus.slice(1)}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-black/95 backdrop-blur-xl border-white/10">
@@ -459,10 +459,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
                         booking.status === 'denied' ? 'bg-red-500/20 text-red-500 border border-red-500/30' :
                         'bg-gray-500/20 text-gray-400 border border-gray-500/30'
                       }`}>
-                        {booking.status === 'pending' ? t.pending :
-                         booking.status === 'approved' ? t.approved :
-                         booking.status === 'denied' ? t.denied :
-                         t.cancelled}
+                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                       </span>
                     </div>
 
@@ -477,7 +474,7 @@ export function MyBookings({ language, userId }: { language: Language; userId?: 
 
                       <div>
                         <p className="text-sm text-gray-400">{t.passengers}</p>
-                        <p className="text-white font-medium">{booking.passengers} {language === 'en' ? 'passengers' : 'passagers'}</p>
+                        <p className="text-white font-medium">{booking.passengers} passengers</p>
                       </div>
 
                       <div>
@@ -535,7 +532,7 @@ function EditBookingDialog({ booking, onUpdate, t, language }: EditBookingDialog
       onUpdate();
       setIsOpen(false);
     } else {
-      toast.error('Échec de la mise à jour de la réservation');
+      toast.error(t.failedToUpdate);
     }
   };
 

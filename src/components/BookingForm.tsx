@@ -29,10 +29,12 @@ interface BookingFormProps {
 const translations = {
   en: {
     title: 'New Booking Request',
+    subtitle: 'Fill out the form below to request a vehicle',
     tripDetails: 'Trip Details',
     date: 'Date',
     time: 'Departure Time',
     destination: 'Destination',
+    destinationPlaceholder: 'Enter destination address',
     passengers: 'Number of Passengers',
     vehicleType: 'Vehicle Type',
     purpose: 'Purpose',
@@ -51,14 +53,27 @@ const translations = {
     submit: 'Submit Booking Request',
     success: 'Booking request submitted successfully!',
     pleaseSelect: 'Please select a vehicle type',
-    minAdvanceBooking: 'Reservations must be made at least 24 hours in advance',
+    confirmationTitle: 'Booking Confirmation',
+    confirmationSubtitle: 'Please review your booking details',
+    dateLabel: 'Date:',
+    timeLabel: 'Time:',
+    destinationLabel: 'Destination:',
+    passengersLabel: 'Passengers:',
+    vehicleLabel: 'Vehicle:',
+    purposeLabel: 'Purpose:',
+    backToEdit: 'Back to Edit',
+    confirmBooking: 'Confirm Booking',
+    pastDateError: 'Cannot book a trip for a past date',
+    failedToCreate: 'Failed to create booking',
   },
   fr: {
     title: 'Nouvelle demande de réservation',
+    subtitle: 'Remplissez le formulaire ci-dessous pour demander un véhicule',
     tripDetails: 'Détails du voyage',
     date: 'Date',
     time: 'Heure de départ',
     destination: 'Destination',
+    destinationPlaceholder: 'Entrez l\'adresse de destination',
     passengers: 'Nombre de passagers',
     vehicleType: 'Type de véhicule',
     purpose: 'Objectif',
@@ -77,7 +92,18 @@ const translations = {
     submit: 'Soumettre la demande de réservation',
     success: 'Demande de réservation soumise avec succès!',
     pleaseSelect: 'Veuillez sélectionner un type de véhicule',
-    minAdvanceBooking: 'Les réservations doivent être effectuées au moins 24 heures à l\'avance',
+    confirmationTitle: 'Confirmation de réservation',
+    confirmationSubtitle: 'Veuillez vérifier les détails de votre réservation',
+    dateLabel: 'Date :',
+    timeLabel: 'Heure :',
+    destinationLabel: 'Destination :',
+    passengersLabel: 'Passagers :',
+    vehicleLabel: 'Véhicule :',
+    purposeLabel: 'Objectif :',
+    backToEdit: 'Retour à la modification',
+    confirmBooking: 'Confirmer la réservation',
+    pastDateError: 'Impossible de réserver un voyage pour une date passée',
+    failedToCreate: 'Échec de la création de la réservation',
   },
 };
 
@@ -117,23 +143,13 @@ export function BookingForm({ user, language }: BookingFormProps) {
       return;
     }
 
-    // Validate date and time are provided
-    if (!formData.date || !formData.time) {
-      toast.error('Veuillez sélectionner la date et l\'heure');
-      return;
-    }
-
-    // Validate booking is at least 24 hours in advance
+    // Validate date is not in the past
     const selectedDate = new Date(formData.date);
-    const [hours, minutes] = formData.time.split(':').map(Number);
-    const departureDateTime = new Date(selectedDate);
-    departureDateTime.setHours(hours, minutes, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
-    const now = new Date();
-    const minBookingTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
-    
-    if (departureDateTime < minBookingTime) {
-      toast.error(t.minAdvanceBooking);
+    if (selectedDate < today) {
+      toast.error(t.pastDateError);
       return;
     }
 
@@ -175,7 +191,7 @@ export function BookingForm({ user, language }: BookingFormProps) {
       });
       setShowConfirmation(false);
     } else {
-      toast.error('Échec de la création de la réservation');
+      toast.error(t.failedToCreate);
     }
   };
 
@@ -188,32 +204,32 @@ export function BookingForm({ user, language }: BookingFormProps) {
               <div className="mx-auto mb-6 h-20 w-20 rounded-full bg-green-500/20 flex items-center justify-center">
                 <CheckCircle className="h-12 w-12 text-green-500" />
               </div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-green-500 to-white bg-clip-text text-transparent mb-2">Confirmation de réservation</h2>
-              <p className="text-gray-400 mb-6">Veuillez vérifier les détails de votre réservation</p>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-green-500 to-white bg-clip-text text-transparent mb-2">{t.confirmationTitle}</h2>
+              <p className="text-gray-400 mb-6">{t.confirmationSubtitle}</p>
               
               <div className="text-left space-y-4 mb-8 bg-white/5 p-6 rounded-lg border border-white/10">
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <span className="text-gray-400">Date :</span>
+                  <span className="text-gray-400">{t.dateLabel}</span>
                   <span className="text-white font-medium">{formData.date}</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <span className="text-gray-400">Heure :</span>
+                  <span className="text-gray-400">{t.timeLabel}</span>
                   <span className="text-white font-medium">{formData.time}</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <span className="text-gray-400">Destination :</span>
+                  <span className="text-gray-400">{t.destinationLabel}</span>
                   <span className="text-white font-medium">{formData.destination}</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <span className="text-gray-400">Passagers :</span>
+                  <span className="text-gray-400">{t.passengersLabel}</span>
                   <span className="text-white font-medium">{formData.passengers}</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                  <span className="text-gray-400">Véhicule :</span>
+                  <span className="text-gray-400">{t.vehicleLabel}</span>
                   <span className="text-white font-medium">{formData.vehicleType}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Objectif :</span>
+                  <span className="text-gray-400">{t.purposeLabel}</span>
                   <span className="text-white font-medium">{formData.purpose === 'Other' ? formData.otherPurpose : formData.purpose}</span>
                 </div>
               </div>
@@ -224,13 +240,13 @@ export function BookingForm({ user, language }: BookingFormProps) {
                   variant="outline"
                   className="flex-1 border-white/20 bg-white/5 text-white hover:bg-white/10"
                 >
-                  Retour à la modification
+                  {t.backToEdit}
                 </Button>
                 <Button
                   onClick={confirmSubmit}
                   className="flex-1 bg-gradient-to-r from-[#FFD700] to-[#FFA500] text-black hover:from-[#FFD700]/90 hover:to-[#FFA500]/90 shadow-lg shadow-[#FFD700]/20"
                 >
-                  Confirmer la réservation
+                  {t.confirmBooking}
                 </Button>
               </div>
             </div>
@@ -245,7 +261,7 @@ export function BookingForm({ user, language }: BookingFormProps) {
       <div className="container mx-auto max-w-3xl">
         <div className="mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent mb-2">{t.title}</h1>
-          <p className="text-gray-400">Remplissez le formulaire ci-dessous pour demander un véhicule</p>
+          <p className="text-gray-400">{t.subtitle}</p>
         </div>
 
         <Card className="p-8 border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl">
@@ -265,18 +281,10 @@ export function BookingForm({ user, language }: BookingFormProps) {
                   type="date"
                   value={formData.date}
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  min={(() => {
-                    // Minimum date is tomorrow (to ensure 24 hours advance booking)
-                    const tomorrow = new Date();
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    return tomorrow.toISOString().split('T')[0];
-                  })()}
+                  min={new Date().toISOString().split('T')[0]}
                   required
                   className="bg-white/10 border-white/20 text-white focus:border-[#FFD700]"
                 />
-                <p className="text-xs text-gray-400 mt-1">
-                  {language === 'en' ? 'Minimum 24 hours advance booking required' : 'Réservation minimum 24 heures à l\'avance requise'}
-                </p>
               </div>
 
               <div>
@@ -301,7 +309,7 @@ export function BookingForm({ user, language }: BookingFormProps) {
                 id="destination"
                 value={formData.destination}
                 onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-                placeholder="Entrez l'adresse de destination"
+                placeholder={t.destinationPlaceholder}
                 required
                 className="bg-white/10 border-white/20 text-white placeholder:text-gray-500 focus:border-[#FFD700]"
               />
@@ -329,7 +337,7 @@ export function BookingForm({ user, language }: BookingFormProps) {
               </Select>
               {formData.vehicleType && (
                 <p className="text-sm text-gray-400 mt-2">
-                  Capacité maximale : {selectedCapacity} passagers
+                  Maximum capacity: {selectedCapacity} passengers
                 </p>
               )}
             </div>
