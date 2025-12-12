@@ -1,4 +1,4 @@
-import { Check, X, Calendar, Users, MapPin, Search, Filter, RefreshCw, Download, CheckSquare, Square, AlertCircle } from 'lucide-react';
+import { Check, X, Calendar, Users, MapPin, Search, Filter, RefreshCw, Download, CheckSquare, Square, AlertCircle, Bell, Clock } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { StatusBadge } from '../ui/status-badge';
@@ -12,7 +12,7 @@ import { toast } from 'sonner@2.0.3';
 import { Language } from '../../App';
 import { useBookings } from '../../hooks/useBackend';
 import { bookingAPI } from '../../utils/api';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { exportBookingsToCSV } from '../../utils/export';
 import { EmptyState } from '../ui/empty-state';
 import { TableSkeleton } from '../ui/skeleton';
@@ -78,6 +78,15 @@ const translations = {
     failedToDenySome: 'Failed to deny some bookings',
     pastDateWarning: 'This booking date has already passed',
     cannotApprovePast: 'Cannot approve a booking for a past date',
+    cannotDenyPast: 'Cannot deny a booking for a past date',
+    cannotCancelPast: 'Cannot cancel a booking for a past date',
+    pastBookings: 'Past Bookings',
+    upcomingBookings: 'Upcoming Bookings',
+    setReminder: 'Set Reminder',
+    reminderSet: 'Reminder Set',
+    reminder12Hours: 'Reminder 12 hours before',
+    reminderActive: 'Reminder active',
+    noPastBookings: 'No past bookings',
   },
   fr: {
     noPending: 'Aucune approbation en attente',
@@ -125,6 +134,15 @@ const translations = {
     failedToDenySome: 'Échec du refus de certaines réservations',
     pastDateWarning: 'La date de cette réservation est déjà passée',
     cannotApprovePast: 'Impossible d\'approuver une réservation pour une date passée',
+    cannotDenyPast: 'Impossible de refuser une réservation pour une date passée',
+    cannotCancelPast: 'Impossible d\'annuler une réservation pour une date passée',
+    pastBookings: 'Réservations passées',
+    upcomingBookings: 'Réservations à venir',
+    setReminder: 'Définir un rappel',
+    reminderSet: 'Rappel défini',
+    reminder12Hours: 'Rappel 12 heures avant',
+    reminderActive: 'Rappel actif',
+    noPastBookings: 'Aucune réservation passée',
   },
 };
 
@@ -136,6 +154,8 @@ export function ApprovalsTab({ language }: { language: Language }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedRequests, setSelectedRequests] = useState<Set<string>>(new Set());
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showPastBookings, setShowPastBookings] = useState(false);
+  const [reminders, setReminders] = useState<Set<string>>(new Set());
 
   const isBookingDatePassed = (request: BookingRequest): boolean => {
     try {
@@ -146,6 +166,60 @@ export function ApprovalsTab({ language }: { language: Language }) {
       return false;
     }
   };
+
+  const getBookingDateTime = (request: BookingRequest): Date => {
+    try {
+      return new Date(`${request.date}T${request.time}`);
+    } catch {
+      return new Date();
+    }
+  };
+
+  const isReminderTime = (request: BookingRequest): boolean => {
+    const bookingDateTime = getBookingDateTime(request);
+    const now = new Date();
+    const reminderTime = new Date(bookingDateTime.getTime() - 12 * 60 * 60 * 1000); // 12 hours before
+    return now >= reminderTime && now < bookingDateTime && reminders.has(request.id);
+  };
+
+  const handleSetReminder = (requestId: string) => {
+    const newReminders = new Set(reminders);
+    if (newReminders.has(requestId)) {
+      newReminders.delete(requestId);
+      toast.success('Reminder removed');
+    } else {
+      newReminders.add(requestId);
+      toast.success(t.reminderSet);
+    }
+    setReminders(newReminders);
+    localStorage.setItem('booking_reminders', JSON.stringify(Array.from(newReminders)));
+  };
+
+  // Load reminders from localStorage
+  useEffect(() => {
+    const savedReminders = localStorage.getItem('booking_reminders');
+    if (savedReminders) {
+      setReminders(new Set(JSON.parse(savedReminders)));
+    }
+  }, []);
+
+  // Check for reminder times and show notifications
+  useEffect(() => {
+    const checkReminders = () => {
+      requests.forEach((request: BookingRequest) => {
+        if (isReminderTime(request) && request.status === 'approved') {
+          toast.info(`Reminder: Booking for ${request.employeeName} is in 12 hours!`, {
+            duration: 10000,
+          });
+        }
+      });
+    };
+
+    const interval = setInterval(checkReminders, 60000); // Check every minute
+    checkReminders(); // Check immediately
+
+    return () => clearInterval(interval);
+  }, [requests, reminders]);
 
   const handleApprove = async (id: string, request: BookingRequest) => {
     // Check if booking date has passed
@@ -205,15 +279,33 @@ export function ApprovalsTab({ language }: { language: Language }) {
   };
 
   const handleBulkDeny = async () => {
+    // Filter out past-dated bookings
+    const validRequests = Array.from(selectedRequests)
+      .map(id => requests.find(r => r.id === id))
+      .filter((r): r is BookingRequest => r !== undefined && !isBookingDatePassed(r));
+    
+    const pastRequests = Array.from(selectedRequests)
+      .map(id => requests.find(r => r.id === id))
+      .filter((r): r is BookingRequest => r !== undefined && isBookingDatePassed(r));
+
+    if (pastRequests.length > 0) {
+      toast.error(`${pastRequests.length} ${t.cannotDenyPast}`);
+    }
+
+    if (validRequests.length === 0) {
+      setIsProcessing(false);
+      return;
+    }
+
     setIsProcessing(true);
-    const promises = Array.from(selectedRequests).map(id => {
-      const bookingId = id.replace('booking:', '');
+    const promises = validRequests.map(request => {
+      const bookingId = request.id.replace('booking:', '');
       return bookingAPI.updateStatus(bookingId, 'denied');
     });
     
     try {
       await Promise.all(promises);
-      toast.success(`${selectedRequests.size} ${t.denied}`);
+      toast.success(`${validRequests.length} ${t.denied}`);
       setSelectedRequests(new Set());
       refetch();
     } catch (error) {
@@ -241,7 +333,13 @@ export function ApprovalsTab({ language }: { language: Language }) {
     setSelectedRequests(newSelected);
   };
 
-  const handleDeny = async (id: string) => {
+  const handleDeny = async (id: string, request: BookingRequest) => {
+    // Check if booking date has passed
+    if (isBookingDatePassed(request)) {
+      toast.error(t.cannotDenyPast);
+      return;
+    }
+
     setIsProcessing(true);
     const bookingId = id.replace('booking:', '');
     const response = await bookingAPI.updateStatus(bookingId, 'denied');
@@ -266,8 +364,14 @@ export function ApprovalsTab({ language }: { language: Language }) {
   // Get unique departments for filter
   const departments = Array.from(new Set(requests.map((r: BookingRequest) => r.department)));
 
+  // Separate past and upcoming bookings
+  const pastBookings = requests.filter((request: BookingRequest) => isBookingDatePassed(request));
+  const upcomingBookings = requests.filter((request: BookingRequest) => !isBookingDatePassed(request));
+
   // Filter bookings based on search, department, and status
-  const filteredRequests = requests.filter((request: BookingRequest) => {
+  const bookingsToShow = showPastBookings ? pastBookings : upcomingBookings;
+  
+  const filteredRequests = bookingsToShow.filter((request: BookingRequest) => {
     const matchesSearch = 
       request.employeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       request.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -279,11 +383,19 @@ export function ApprovalsTab({ language }: { language: Language }) {
     return matchesSearch && matchesDepartment && matchesStatus;
   });
 
-  // Sort by createdAt (newest first)
-  const sortedRequests = [...filteredRequests].sort((a: any, b: any) => {
-    const dateA = new Date(a.createdAt || 0).getTime();
-    const dateB = new Date(b.createdAt || 0).getTime();
-    return dateB - dateA;
+  // Sort by date/time (upcoming first, or past last)
+  const sortedRequests = [...filteredRequests].sort((a: BookingRequest, b: BookingRequest) => {
+    if (showPastBookings) {
+      // For past bookings, sort by date descending (most recent first)
+      const dateA = getBookingDateTime(a).getTime();
+      const dateB = getBookingDateTime(b).getTime();
+      return dateB - dateA;
+    } else {
+      // For upcoming bookings, sort by date ascending (soonest first)
+      const dateA = getBookingDateTime(a).getTime();
+      const dateB = getBookingDateTime(b).getTime();
+      return dateA - dateB;
+    }
   });
 
   if (requests.length === 0 && !loading) {
@@ -361,9 +473,27 @@ export function ApprovalsTab({ language }: { language: Language }) {
         </Card>
       )}
 
+      {/* Toggle Past/Upcoming Bookings */}
+      <div className="flex gap-2 mb-4">
+        <Button
+          variant={!showPastBookings ? "default" : "outline"}
+          onClick={() => setShowPastBookings(false)}
+          className={!showPastBookings ? "bg-[#FFD700] text-black hover:bg-[#FFA500]" : "bg-white/10 border-white/20 text-white hover:bg-white/20"}
+        >
+          {t.upcomingBookings} ({upcomingBookings.length})
+        </Button>
+        <Button
+          variant={showPastBookings ? "default" : "outline"}
+          onClick={() => setShowPastBookings(true)}
+          className={showPastBookings ? "bg-[#FFD700] text-black hover:bg-[#FFA500]" : "bg-white/10 border-white/20 text-white hover:bg-white/20"}
+        >
+          {t.pastBookings} ({pastBookings.length})
+        </Button>
+      </div>
+
       {/* Search and Filter Bar */}
       <div className="flex flex-col md:flex-row gap-4">
-        {filteredRequests.length > 0 && (
+        {filteredRequests.length > 0 && !showPastBookings && (
           <Button
             variant="outline"
             size="sm"
@@ -444,10 +574,10 @@ export function ApprovalsTab({ language }: { language: Language }) {
         <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
           <EmptyState
             icon={Search}
-            title="No approvals match your filters"
-            description="Try adjusting your search or filter criteria"
-            secondaryActionLabel="Clear Filters"
-            onSecondaryAction={() => {
+            title={showPastBookings ? t.noPastBookings : "No approvals match your filters"}
+            description={showPastBookings ? "" : "Try adjusting your search or filter criteria"}
+            secondaryActionLabel={showPastBookings ? undefined : "Clear Filters"}
+            onSecondaryAction={showPastBookings ? undefined : () => {
               setSearchQuery('');
               setDepartmentFilter('all');
               setStatusFilter('all');
@@ -459,19 +589,21 @@ export function ApprovalsTab({ language }: { language: Language }) {
           {sortedRequests.map((request) => (
             <Card key={request.id} className="p-6 border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg hover:bg-white/10 transition-all group">
               <div className="flex gap-4">
-                {/* Selection Checkbox */}
-                <div className="flex items-start pt-1">
-                  <button
-                    onClick={() => toggleRequestSelection(request.id)}
-                    className="p-1 rounded hover:bg-white/10 transition-colors"
-                  >
-                    {selectedRequests.has(request.id) ? (
-                      <CheckSquare className="h-5 w-5 text-[#FFD700]" />
-                    ) : (
-                      <Square className="h-5 w-5 text-gray-400" />
-                    )}
-                  </button>
-                </div>
+                {/* Selection Checkbox - Only for upcoming bookings */}
+                {!showPastBookings && (
+                  <div className="flex items-start pt-1">
+                    <button
+                      onClick={() => toggleRequestSelection(request.id)}
+                      className="p-1 rounded hover:bg-white/10 transition-colors"
+                    >
+                      {selectedRequests.has(request.id) ? (
+                        <CheckSquare className="h-5 w-5 text-[#FFD700]" />
+                      ) : (
+                        <Square className="h-5 w-5 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
+                )}
 
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-4">
@@ -519,6 +651,26 @@ export function ApprovalsTab({ language }: { language: Language }) {
                       <p className="text-white">{request.purpose}</p>
                     </div>
                   </div>
+
+                  {/* Reminder Button for Upcoming Approved Bookings */}
+                  {!isBookingDatePassed(request) && request.status === 'approved' && (
+                    <div className="mb-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSetReminder(request.id)}
+                        className={`w-full border-white/20 text-white hover:bg-white/10 ${
+                          reminders.has(request.id) ? 'bg-[#FFD700]/20 border-[#FFD700]/50' : ''
+                        }`}
+                      >
+                        <Bell className={`h-4 w-4 mr-2 ${reminders.has(request.id) ? 'text-[#FFD700]' : ''}`} />
+                        {reminders.has(request.id) ? t.reminderActive : t.setReminder}
+                        {reminders.has(request.id) && (
+                          <span className="ml-2 text-xs text-[#FFD700]">({t.reminder12Hours})</span>
+                        )}
+                      </Button>
+                    </div>
+                  )}
 
                   {request.status === 'pending' && (
                     <div className="flex flex-col gap-3">
@@ -574,7 +726,24 @@ export function ApprovalsTab({ language }: { language: Language }) {
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
-                      <DenyDialog requestId={request.id} onDeny={handleDeny} t={t} isProcessing={isProcessing} />
+                      <DenyDialog 
+                        requestId={request.id} 
+                        request={request}
+                        onDeny={handleDeny} 
+                        t={t} 
+                        isProcessing={isProcessing}
+                        isPastDate={isBookingDatePassed(request)}
+                      />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Show reminder status for past bookings */}
+                  {isBookingDatePassed(request) && (
+                    <div className="mt-3 p-3 bg-gray-500/10 border border-gray-500/30 rounded-lg">
+                      <div className="flex items-center gap-2 text-gray-400 text-sm">
+                        <Clock className="h-4 w-4" />
+                        <span>{t.pastDateWarning}</span>
                       </div>
                     </div>
                   )}
@@ -590,12 +759,14 @@ export function ApprovalsTab({ language }: { language: Language }) {
 
 interface DenyDialogProps {
   requestId: string;
-  onDeny: (id: string) => void;
+  request: BookingRequest;
+  onDeny: (id: string, request: BookingRequest) => void;
   t: typeof translations['en'];
   isProcessing: boolean;
+  isPastDate: boolean;
 }
 
-function DenyDialog({ requestId, onDeny, t, isProcessing }: DenyDialogProps) {
+function DenyDialog({ requestId, request, onDeny, t, isProcessing, isPastDate }: DenyDialogProps) {
   const [reason, setReason] = useState('');
 
   return (
@@ -603,8 +774,8 @@ function DenyDialog({ requestId, onDeny, t, isProcessing }: DenyDialogProps) {
       <AlertDialogTrigger asChild>
         <Button
           variant="destructive"
-          className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 h-12 shadow-lg"
-          disabled={isProcessing}
+          className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 h-12 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isProcessing || isPastDate}
         >
           {isProcessing ? (
             <>
@@ -641,8 +812,9 @@ function DenyDialog({ requestId, onDeny, t, isProcessing }: DenyDialogProps) {
             {t.cancel}
           </AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => onDeny(requestId)}
+            onClick={() => onDeny(requestId, request)}
             className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
+            disabled={isPastDate}
           >
             {t.confirmDeny}
           </AlertDialogAction>
