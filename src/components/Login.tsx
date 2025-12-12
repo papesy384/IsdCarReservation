@@ -177,7 +177,7 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
           <div className="space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl flex items-center justify-center shadow-2xl shadow-[#FFD700]/20">
-                <Car className="w-10 h-10 object-contain" />
+                <img src="/images/SchoolLogo.png" alt="ISD Logo" className="w-10 h-10 object-contain" />
               </div>
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-[#FFD700] via-[#FFD700] to-white bg-clip-text text-transparent">
