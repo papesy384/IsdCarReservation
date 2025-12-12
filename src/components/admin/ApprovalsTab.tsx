@@ -1,3 +1,4 @@
+// ApprovalsTab Component - Admin booking approvals interface
 import { Check, X, Calendar, Users, MapPin, Search, Filter, RefreshCw, Download, CheckSquare, Square, Bell } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
