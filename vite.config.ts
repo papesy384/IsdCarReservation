@@ -5,7 +5,6 @@
 
   export default defineConfig({
     plugins: [react()],
-    publicDir: 'public',
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
@@ -56,32 +55,6 @@
     build: {
       target: 'esnext',
       outDir: 'build',
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            // Vendor chunks
-            'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-            'ui-vendor': [
-              '@radix-ui/react-dialog',
-              '@radix-ui/react-dropdown-menu',
-              '@radix-ui/react-select',
-              '@radix-ui/react-tabs',
-              '@radix-ui/react-popover',
-              '@radix-ui/react-alert-dialog',
-            ],
-            'chart-vendor': ['recharts'],
-            'form-vendor': ['react-hook-form', 'react-day-picker'],
-            // Feature chunks
-            'admin': [
-              './src/components/AdminDashboard.tsx',
-              './src/components/admin/ApprovalsTab.tsx',
-              './src/components/admin/ReportsTab.tsx',
-              './src/components/admin/UsersTab.tsx',
-              './src/components/admin/VehiclesTab.tsx',
-            ],
-          },
-        },
-      },
     },
     server: {
       port: 3000,

@@ -1,8 +1,9 @@
 import React from 'react';
-import { Menu, LogOut, Globe } from 'lucide-react';
+import { Menu, LogOut, Globe, Car } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { UserRole, Language } from '../App';
+import { Logo } from './Logo';
 
 interface NavigationProps {
   currentPage: string;
@@ -70,12 +71,7 @@ export function Navigation({ currentPage, setCurrentPage, userRole, userName, la
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-xl flex items-center justify-center shadow-lg shadow-[#FFD700]/20">
-              <img src="/images/SchoolLogo.png" alt="ISD Logo" className="w-6 h-6 object-contain" />
-            </div>
-            <span className="text-xl font-semibold bg-gradient-to-r from-[#FFD700] to-white bg-clip-text text-transparent">ISD Car Reservation</span>
-          </div>
+          <Logo />
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
@@ -132,7 +128,7 @@ export function Navigation({ currentPage, setCurrentPage, userRole, userName, la
                 <div className="flex flex-col h-full">
                   <div className="flex items-center gap-3 mb-8">
                     <div className="w-10 h-10 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-xl flex items-center justify-center">
-                      <img src="/images/SchoolLogo.png" alt="ISD Logo" className="w-6 h-6 object-contain" />
+                      <Car className="w-6 h-6 object-contain" />
                     </div>
                     <span>ISD Car Reservation</span>
                   </div>
