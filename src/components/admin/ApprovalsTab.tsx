@@ -71,7 +71,6 @@ const translations = {
     failedToApproveSome: 'Failed to approve some bookings',
     failedToDeny: 'Failed to deny booking',
     failedToDenySome: 'Failed to deny some bookings',
-<<<<<<< HEAD
     pastDateWarning: 'This booking date has already passed',
     cannotApprovePast: 'Cannot approve a booking for a past date',
     cannotDenyPast: 'Cannot deny a booking for a past date',
@@ -91,16 +90,6 @@ const translations = {
     clearFilters: 'Clear All Filters',
     activeReminders: 'Active Reminders',
     activeFilters: 'Active filters',
-=======
-    // Stats Dashboard
-    pendingApprovals: 'Pending Approvals',
-    approvedToday: 'Approved Today',
-    activeReminders: 'Active Reminders',
-    viewingAll: 'Viewing All',
-    totalBookings: 'Total Bookings',
-    clearFilters: 'Clear all filters',
-    activeFilters: 'Active filters:',
->>>>>>> 9e27fc04af0a9ef7d182273c3c48f70aa115a89f
   },
   fr: {
     noPending: 'Aucune approbation en attente',
@@ -141,7 +130,6 @@ const translations = {
     failedToApproveSome: 'Échec de l\'approbation de certaines réservations',
     failedToDeny: 'Échec du refus de la réservation',
     failedToDenySome: 'Échec du refus de certaines réservations',
-<<<<<<< HEAD
     pastDateWarning: 'La date de cette réservation est déjà passée',
     cannotApprovePast: 'Impossible d\'approuver une réservation pour une date passée',
     cannotDenyPast: 'Impossible de refuser une réservation pour une date passée',
@@ -161,16 +149,6 @@ const translations = {
     clearFilters: 'Effacer tous les filtres',
     activeReminders: 'Rappels actifs',
     activeFilters: 'Filtres actifs',
-=======
-    // Stats Dashboard
-    pendingApprovals: 'Approbations en attente',
-    approvedToday: 'Approuvé aujourd\'hui',
-    activeReminders: 'Rappels actifs',
-    viewingAll: 'Voir tout',
-    totalBookings: 'Total des réservations',
-    clearFilters: 'Effacer tous les filtres',
-    activeFilters: 'Filtres actifs:',
->>>>>>> 9e27fc04af0a9ef7d182273c3c48f70aa115a89f
   },
 };
 
@@ -179,10 +157,83 @@ export function ApprovalsTab({ language }: { language: Language }) {
   const { bookings: requests, loading, refetch } = useBookings();
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [selectedRequests, setSelectedRequests] = useState<Set<string>>(new Set());
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showPastBookings, setShowPastBookings] = useState(false);
+  const [reminders, setReminders] = useState<Set<string>>(new Set());
 
-  const handleApprove = async (id: string) => {
+  const isBookingDatePassed = (request: BookingRequest): boolean => {
+    try {
+      const bookingDateTime = new Date(`${request.date}T${request.time}`);
+      const now = new Date();
+      return bookingDateTime < now;
+    } catch {
+      return false;
+    }
+  };
+
+  const getBookingDateTime = (request: BookingRequest): Date => {
+    try {
+      return new Date(`${request.date}T${request.time}`);
+    } catch {
+      return new Date();
+    }
+  };
+
+  const isReminderTime = (request: BookingRequest): boolean => {
+    const bookingDateTime = getBookingDateTime(request);
+    const now = new Date();
+    const reminderTime = new Date(bookingDateTime.getTime() - 12 * 60 * 60 * 1000); // 12 hours before
+    return now >= reminderTime && now < bookingDateTime && reminders.has(request.id);
+  };
+
+  const handleSetReminder = (requestId: string) => {
+    const newReminders = new Set(reminders);
+    if (newReminders.has(requestId)) {
+      newReminders.delete(requestId);
+      toast.success('Reminder removed');
+    } else {
+      newReminders.add(requestId);
+      toast.success(t.reminderSet);
+    }
+    setReminders(newReminders);
+    localStorage.setItem('booking_reminders', JSON.stringify(Array.from(newReminders)));
+  };
+
+  // Load reminders from localStorage
+  useEffect(() => {
+    const savedReminders = localStorage.getItem('booking_reminders');
+    if (savedReminders) {
+      setReminders(new Set(JSON.parse(savedReminders)));
+    }
+  }, []);
+
+  // Check for reminder times and show notifications
+  useEffect(() => {
+    const checkReminders = () => {
+      requests.forEach((request: BookingRequest) => {
+        if (isReminderTime(request) && request.status === 'approved') {
+          toast.info(`Reminder: Booking for ${request.employeeName} is in 12 hours!`, {
+            duration: 10000,
+          });
+        }
+      });
+    };
+
+    const interval = setInterval(checkReminders, 60000); // Check every minute
+    checkReminders(); // Check immediately
+
+    return () => clearInterval(interval);
+  }, [requests, reminders]);
+
+  const handleApprove = async (id: string, request: BookingRequest) => {
+    // Check if booking date has passed
+    if (isBookingDatePassed(request)) {
+      toast.error(t.cannotApprovePast);
+      return;
+    }
+
     setIsProcessing(true);
     const bookingId = id.replace('booking:', '');
     const response = await bookingAPI.updateStatus(bookingId, 'approved');
@@ -197,15 +248,33 @@ export function ApprovalsTab({ language }: { language: Language }) {
   };
 
   const handleBulkApprove = async () => {
+    // Filter out past-dated bookings
+    const validRequests = Array.from(selectedRequests)
+      .map(id => requests.find(r => r.id === id))
+      .filter((r): r is BookingRequest => r !== undefined && !isBookingDatePassed(r));
+    
+    const pastRequests = Array.from(selectedRequests)
+      .map(id => requests.find(r => r.id === id))
+      .filter((r): r is BookingRequest => r !== undefined && isBookingDatePassed(r));
+
+    if (pastRequests.length > 0) {
+      toast.error(`${pastRequests.length} ${t.cannotApprovePast}`);
+    }
+
+    if (validRequests.length === 0) {
+      setIsProcessing(false);
+      return;
+    }
+
     setIsProcessing(true);
-    const promises = Array.from(selectedRequests).map(id => {
-      const bookingId = id.replace('booking:', '');
+    const promises = validRequests.map(request => {
+      const bookingId = request.id.replace('booking:', '');
       return bookingAPI.updateStatus(bookingId, 'approved');
     });
     
     try {
       await Promise.all(promises);
-      toast.success(`${selectedRequests.size} ${t.approved}`);
+      toast.success(`${validRequests.length} ${t.approved}`);
       setSelectedRequests(new Set());
       refetch();
     } catch (error) {
@@ -216,15 +285,33 @@ export function ApprovalsTab({ language }: { language: Language }) {
   };
 
   const handleBulkDeny = async () => {
+    // Filter out past-dated bookings
+    const validRequests = Array.from(selectedRequests)
+      .map(id => requests.find(r => r.id === id))
+      .filter((r): r is BookingRequest => r !== undefined && !isBookingDatePassed(r));
+    
+    const pastRequests = Array.from(selectedRequests)
+      .map(id => requests.find(r => r.id === id))
+      .filter((r): r is BookingRequest => r !== undefined && isBookingDatePassed(r));
+
+    if (pastRequests.length > 0) {
+      toast.error(`${pastRequests.length} ${t.cannotDenyPast}`);
+    }
+
+    if (validRequests.length === 0) {
+      setIsProcessing(false);
+      return;
+    }
+
     setIsProcessing(true);
-    const promises = Array.from(selectedRequests).map(id => {
-      const bookingId = id.replace('booking:', '');
+    const promises = validRequests.map(request => {
+      const bookingId = request.id.replace('booking:', '');
       return bookingAPI.updateStatus(bookingId, 'denied');
     });
     
     try {
       await Promise.all(promises);
-      toast.success(`${selectedRequests.size} ${t.denied}`);
+      toast.success(`${validRequests.length} ${t.denied}`);
       setSelectedRequests(new Set());
       refetch();
     } catch (error) {
@@ -252,7 +339,13 @@ export function ApprovalsTab({ language }: { language: Language }) {
     setSelectedRequests(newSelected);
   };
 
-  const handleDeny = async (id: string) => {
+  const handleDeny = async (id: string, request: BookingRequest) => {
+    // Check if booking date has passed
+    if (isBookingDatePassed(request)) {
+      toast.error(t.cannotDenyPast);
+      return;
+    }
+
     setIsProcessing(true);
     const bookingId = id.replace('booking:', '');
     const response = await bookingAPI.updateStatus(bookingId, 'denied');
@@ -274,22 +367,9 @@ export function ApprovalsTab({ language }: { language: Language }) {
     );
   }
 
-  const pendingRequests = requests.filter(r => r.status === 'pending');
-
-  // Calculate stats
-  const today = new Date().toISOString().split('T')[0];
-  const approvedTodayCount = requests.filter((r: BookingRequest) => {
-    const createdDate = new Date(r.createdAt || '').toISOString().split('T')[0];
-    return r.status === 'approved' && createdDate === today;
-  }).length;
-  
-  // Placeholder for reminders count - will be 0 for now
-  const activeRemindersCount = 0;
-
   // Get unique departments for filter
   const departments = Array.from(new Set(requests.map((r: BookingRequest) => r.department)));
 
-<<<<<<< HEAD
   // Separate past and upcoming bookings
   const pastBookings = requests.filter((request: BookingRequest) => isBookingDatePassed(request));
   const upcomingBookings = requests.filter((request: BookingRequest) => !isBookingDatePassed(request));
@@ -314,28 +394,33 @@ export function ApprovalsTab({ language }: { language: Language }) {
   const bookingsToShow = showPastBookings ? pastBookings : upcomingBookings;
   
   const filteredRequests = bookingsToShow.filter((request: BookingRequest) => {
-=======
-  // Filter bookings based on search and department
-  const filteredRequests = requests.filter((request: BookingRequest) => {
->>>>>>> 9e27fc04af0a9ef7d182273c3c48f70aa115a89f
     const matchesSearch = 
       request.employeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       request.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
       request.department.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesDepartment = departmentFilter === 'all' || request.department === departmentFilter;
+    const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
     
-    return matchesSearch && matchesDepartment;
+    return matchesSearch && matchesDepartment && matchesStatus;
   });
 
-  // Sort by createdAt (newest first)
-  const sortedRequests = [...filteredRequests].sort((a: any, b: any) => {
-    const dateA = new Date(a.createdAt || 0).getTime();
-    const dateB = new Date(b.createdAt || 0).getTime();
-    return dateB - dateA;
+  // Sort by date/time (upcoming first, or past last)
+  const sortedRequests = [...filteredRequests].sort((a: BookingRequest, b: BookingRequest) => {
+    if (showPastBookings) {
+      // For past bookings, sort by date descending (most recent first)
+      const dateA = getBookingDateTime(a).getTime();
+      const dateB = getBookingDateTime(b).getTime();
+      return dateB - dateA;
+    } else {
+      // For upcoming bookings, sort by date ascending (soonest first)
+      const dateA = getBookingDateTime(a).getTime();
+      const dateB = getBookingDateTime(b).getTime();
+      return dateA - dateB;
+    }
   });
 
-  if (pendingRequests.length === 0) {
+  if (requests.length === 0 && !loading) {
     return (
       <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
         <EmptyState
@@ -392,46 +477,6 @@ export function ApprovalsTab({ language }: { language: Language }) {
           )}
         </div>
       )}
-=======
-      {/* Stats Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-6 border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg hover:border-[#FFD700]/30 transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-400 mb-1">{t.pendingApprovals}</p>
-              <p className="text-3xl font-bold text-white">{pendingRequests.length}</p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FFD700] to-[#FFA500] flex items-center justify-center">
-              <Clock className="h-6 w-6 text-black" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6 border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg hover:border-green-500/30 transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-400 mb-1">{t.approvedToday}</p>
-              <p className="text-3xl font-bold text-white">{approvedTodayCount}</p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-white" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-6 border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg hover:border-blue-500/30 transition-all">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-400 mb-1">{t.totalBookings}</p>
-              <p className="text-3xl font-bold text-white">{requests.length}</p>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-              <CheckSquare className="h-6 w-6 text-white" />
-            </div>
-          </div>
-        </Card>
-      </div>
->>>>>>> 9e27fc04af0a9ef7d182273c3c48f70aa115a89f
 
       {/* Bulk Actions Toolbar */}
       {selectedRequests.size > 0 && (
@@ -589,41 +634,6 @@ export function ApprovalsTab({ language }: { language: Language }) {
       {hasActiveFilters && (
         <div className="text-sm text-gray-400">
           {filteredRequests.length} {t.results}
-=======
-      {/* Active Filter Chips */}
-      {(searchQuery || departmentFilter !== 'all') && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-gray-400">{t.activeFilters}</span>
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white hover:bg-white/20 transition-colors group"
-            >
-              <Search className="h-3.5 w-3.5 text-[#FFD700]" />
-              <span>"{searchQuery}"</span>
-              <X className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100" />
-            </button>
-          )}
-          {departmentFilter !== 'all' && (
-            <button
-              onClick={() => setDepartmentFilter('all')}
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white hover:bg-white/20 transition-colors group"
-            >
-              <Filter className="h-3.5 w-3.5 text-[#FFD700]" />
-              <span>{departmentFilter}</span>
-              <X className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100" />
-            </button>
-          )}
-          <button
-            onClick={() => {
-              setSearchQuery('');
-              setDepartmentFilter('all');
-            }}
-            className="text-sm text-[#FFD700] hover:text-[#FFA500] transition-colors underline"
-          >
-            {t.clearFilters}
-          </button>
->>>>>>> 9e27fc04af0a9ef7d182273c3c48f70aa115a89f
         </div>
       )}
 
@@ -637,15 +647,6 @@ export function ApprovalsTab({ language }: { language: Language }) {
             description={showPastBookings ? "All past bookings are displayed here for reference." : (hasActiveFilters ? "Try adjusting your search or filter criteria to see more results." : t.emptyDescription)}
             secondaryActionLabel={showPastBookings ? undefined : (hasActiveFilters ? "Clear Filters" : undefined)}
             onSecondaryAction={showPastBookings ? undefined : (hasActiveFilters ? clearAllFilters : undefined)}
-=======
-            title="No approvals match your filters"
-            description="Try adjusting your search or filter criteria"
-            secondaryActionLabel="Clear Filters"
-            onSecondaryAction={() => {
-              setSearchQuery('');
-              setDepartmentFilter('all');
-            }}
->>>>>>> 9e27fc04af0a9ef7d182273c3c48f70aa115a89f
           />
         </Card>
       ) : (
