@@ -9,7 +9,7 @@ import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { toast } from 'sonner@2.0.3';
 import { Language } from '../../App';
-import { usePendingBookings } from '../../hooks/useBackend';
+import { useBookings } from '../../hooks/useBackend';
 import { bookingAPI } from '../../utils/api';
 import { useState } from 'react';
 import { exportBookingsToCSV } from '../../utils/export';
@@ -26,7 +26,7 @@ interface BookingRequest {
   passengers: number;
   vehicleType: string;
   purpose: string;
-  status: 'pending' | 'approved' | 'denied';
+  status: 'pending' | 'approved' | 'denied' | 'cancelled';
   createdAt: string;
 }
 
@@ -56,6 +56,7 @@ const translations = {
     cancel: 'Cancel',
     searchPlaceholder: 'Search by name, destination, or department...',
     filterByDept: 'All Departments',
+    filterByStatus: 'All Statuses',
     results: 'results',
     emptyTitle: 'All caught up!',
     emptyDescription: 'No pending booking approvals at the moment. New requests will appear here.',
@@ -96,6 +97,7 @@ const translations = {
     cancel: 'Annuler',
     searchPlaceholder: 'Rechercher par nom, destination ou département...',
     filterByDept: 'Tous les départements',
+    filterByStatus: 'Tous les statuts',
     results: 'résultats',
     emptyTitle: 'Tout est à jour!',
     emptyDescription: 'Aucune approbation de réservation en attente pour le moment. Les nouvelles demandes apparaîtront ici.',
@@ -115,9 +117,10 @@ const translations = {
 
 export function ApprovalsTab({ language }: { language: Language }) {
   const t = translations[language];
-  const { bookings: requests, loading, refetch } = usePendingBookings();
+  const { bookings: requests, loading, refetch } = useBookings();
   const [searchQuery, setSearchQuery] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [selectedRequests, setSelectedRequests] = useState<Set<string>>(new Set());
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -213,12 +216,10 @@ export function ApprovalsTab({ language }: { language: Language }) {
     );
   }
 
-  const pendingRequests = requests.filter(r => r.status === 'pending');
-
   // Get unique departments for filter
   const departments = Array.from(new Set(requests.map((r: BookingRequest) => r.department)));
 
-  // Filter bookings based on search and department
+  // Filter bookings based on search, department, and status
   const filteredRequests = requests.filter((request: BookingRequest) => {
     const matchesSearch = 
       request.employeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -226,8 +227,9 @@ export function ApprovalsTab({ language }: { language: Language }) {
       request.department.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesDepartment = departmentFilter === 'all' || request.department === departmentFilter;
+    const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
     
-    return matchesSearch && matchesDepartment;
+    return matchesSearch && matchesDepartment && matchesStatus;
   });
 
   // Sort by createdAt (newest first)
@@ -237,7 +239,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
     return dateB - dateA;
   });
 
-  if (pendingRequests.length === 0) {
+  if (requests.length === 0 && !loading) {
     return (
       <Card className="border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
         <EmptyState
@@ -358,6 +360,21 @@ export function ApprovalsTab({ language }: { language: Language }) {
             </SelectContent>
           </Select>
         </div>
+        <div className="w-full md:w-64">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-12 bg-white/10 border-white/20 text-white focus:border-[#FFD700]">
+              <Filter className="h-4 w-4 mr-2 text-[#FFD700]" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-black/95 backdrop-blur-xl border-white/10">
+              <SelectItem value="all" className="text-white hover:bg-white/10">{t.filterByStatus}</SelectItem>
+              <SelectItem value="pending" className="text-white hover:bg-white/10">Pending</SelectItem>
+              <SelectItem value="approved" className="text-white hover:bg-white/10">Approved</SelectItem>
+              <SelectItem value="denied" className="text-white hover:bg-white/10">Denied</SelectItem>
+              <SelectItem value="cancelled" className="text-white hover:bg-white/10">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <Button
           onClick={refetch}
           variant="outline"
@@ -369,7 +386,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
       </div>
 
       {/* Results Count */}
-      {(searchQuery || departmentFilter !== 'all') && (
+      {(searchQuery || departmentFilter !== 'all' || statusFilter !== 'all') && (
         <div className="text-sm text-gray-400">
           {filteredRequests.length} {t.results}
         </div>
@@ -386,6 +403,7 @@ export function ApprovalsTab({ language }: { language: Language }) {
             onSecondaryAction={() => {
               setSearchQuery('');
               setDepartmentFilter('all');
+              setStatusFilter('all');
             }}
           />
         </Card>
