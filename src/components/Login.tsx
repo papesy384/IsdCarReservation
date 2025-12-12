@@ -8,7 +8,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Mail, Lock, Loader2, Eye, EyeOff, Globe, CheckCircle2, AlertCircle, Car } from 'lucide-react';
+import { Mail, Lock, Loader2, Eye, EyeOff, Globe, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface LoginProps {
@@ -243,7 +243,7 @@ export function Login({ onLogin, onSwitchToSignup, language, setLanguage }: Logi
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-[#FFD700] to-[#FFA500] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-[#FFD700]/20">
-              <Car className="w-10 h-10 object-contain" />
+              <img src="/images/SchoolLogo.png" alt="ISD Logo" className="w-10 h-10 object-contain" />
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-[#FFD700] via-[#FFD700] to-white bg-clip-text text-transparent">
               {t.title}
