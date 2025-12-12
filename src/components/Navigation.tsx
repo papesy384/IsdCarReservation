@@ -4,6 +4,9 @@ import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { UserRole, Language } from '../App';
 
+// Import logo as a module to ensure it's bundled
+const logoPath = '/images/SchoolLogo.png';
+
 interface NavigationProps {
   currentPage: string;
   setCurrentPage: (page: 'dashboard' | 'booking' | 'driver' | 'my-bookings') => void;

@@ -150,3 +150,4 @@ To migrate existing components from the manual translation system:
 - ✅ Type-safe (TypeScript support)
 - ✅ Easy to extend with more languages
 
+

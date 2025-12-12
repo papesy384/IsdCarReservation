@@ -242,3 +242,4 @@ Total hardcoded strings found: 35+
 3. For components using local `translations` objects, migrate to i18n system
 4. Test language switching to ensure all strings are properly translated
 
+
