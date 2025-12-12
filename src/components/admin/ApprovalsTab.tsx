@@ -1,4 +1,4 @@
-import { Check, X, Calendar, Users, MapPin, Search, Filter, RefreshCw, Download, CheckSquare, Square, Clock, TrendingUp, Bell } from 'lucide-react';
+import { Check, X, Calendar, Users, MapPin, Search, Filter, RefreshCw, Download, CheckSquare, Square, Bell } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { StatusBadge } from '../ui/status-badge';
